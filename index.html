@@ -6,74 +6,99 @@
 <title>Offerwall Catalogs</title>
 <style>
 :root{color-scheme:light;--bg:#fcfcfb;--surface:#ffffff;--line:#e6e5e1;--grid:#efeeea;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8984;
- --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--good:#008300;--bad:#e34948;--accent:#2a78d6;--chip:#f0efec}
+ --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--good:#008300;--bad:#e34948;--warn:#b86e00;--accent:#2a78d6;--chip:#f0efec;--hi:#fff7e6;--hiLine:#f0d9a8}
 @media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#151514;--surface:#1f1f1d;--line:#33332f;--grid:#2a2a27;--ink:#fff;--ink2:#c3c2b7;--ink3:#8f8e87;
- --s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#3fb950;--bad:#e66767;--accent:#3987e5;--chip:#2a2a27}}
+ --s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#3fb950;--bad:#e66767;--warn:#e0a24a;--accent:#3987e5;--chip:#2a2a27;--hi:#2b2718;--hiLine:#5a4a22}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-header{padding:20px 24px 8px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline}
-h1{font-size:20px;margin:0}header .sub{color:var(--ink2)}
-main{padding:0 24px 40px;max-width:1280px;margin:0 auto}
-section{margin-top:22px}h2{font-size:15px;margin:0 0 10px;color:var(--ink)}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-.tile .lab{display:flex;align-items:center;gap:8px;color:var(--ink2);font-size:13px}
-.tile .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-.tile .val{font-size:30px;font-weight:600;margin:4px 0 2px}
-.tile .meta{color:var(--ink2);font-size:13px}.tile .delta{font-size:13px;margin-left:6px}
-.up{color:var(--good)}.down{color:var(--bad)}.ok{color:var(--good)}.fail{color:var(--bad)}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
+header{padding:18px 24px 10px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
+h1{font-size:18px;margin:0 8px 0 0}header .sub{color:var(--ink2);font-size:13px}
+.spacer{flex:1}
+main{padding:0 24px 40px;max-width:1320px;margin:0 auto}
+section{margin-top:24px}h2{font-size:15px;margin:0 0 10px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile .lab{color:var(--ink2);font-size:13px}.tile .val{font-size:26px;font-weight:600;margin-top:2px}.tile .meta{color:var(--ink3);font-size:12px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
 .card h3{font-size:13px;margin:0 0 6px;font-weight:600}.card .hint{color:var(--ink3);font-size:12px;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
 svg{width:100%;height:auto;display:block;overflow:visible}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:6px}.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:6px}.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
 .tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 9px;border-radius:6px;font-size:12px;display:none;z-index:10;white-space:nowrap}
-.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 select,input[type=search]{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-input[type=search]{min-width:240px}
+input[type=search]{min-width:220px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.seg button{font:inherit;padding:6px 12px;border:0;background:var(--surface);color:var(--ink2);cursor:pointer}
-.seg button.on{background:var(--accent);color:#fff}
+.seg button{font:inherit;padding:6px 12px;border:0;background:var(--surface);color:var(--ink2);cursor:pointer}.seg button.on{background:var(--accent);color:#fff}
+label.tg{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);cursor:pointer}
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--ink2);font-weight:600;position:sticky;top:0;background:var(--surface);cursor:pointer;white-space:nowrap}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-tr.game{cursor:pointer}tr.game:hover td{background:var(--chip)}
-tr.ms td{background:var(--chip);padding:0 8px 10px}
-.mstab{width:100%;font-size:12px}.mstab td,.mstab th{padding:4px 6px;border-bottom:1px solid var(--line);background:transparent;position:static;cursor:default}
-.tbl{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:var(--chip);border-radius:999px;padding:3px 10px;font-size:12px}
-.muted{color:var(--ink3)}.small{font-size:12px}
+th{color:var(--ink2);font-weight:600;position:sticky;top:0;background:var(--surface);white-space:nowrap}
+th.sort{cursor:pointer}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl{max-height:600px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+tr.game{cursor:pointer}tr.game:hover td{background:var(--chip)}tr.ms td{background:var(--chip);padding:0 8px 10px}
+.mstab{width:100%;font-size:12px}.mstab td,.mstab th{padding:4px 6px;border-bottom:1px solid var(--line);background:transparent;position:static}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.b-added{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)}.b-removed{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.b-reward{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}.b-milestones{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+.co{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;background:var(--chip);color:var(--ink2);margin-left:6px;white-space:nowrap}
+.co.p1{background:var(--hi);color:var(--warn);border:1px solid var(--hiLine)}
+.up{color:var(--good)}.down{color:var(--bad)}.ok{color:var(--good)}.fail{color:var(--bad)}.muted{color:var(--ink3)}.small{font-size:12px}
+.day{padding:8px 8px 4px;color:var(--ink2);font-weight:600;font-size:12px;background:var(--bg);position:sticky;top:31px}
+.pres{display:inline-flex;flex-direction:column;gap:2px;min-width:120px}.pres .absent{color:var(--ink3)}
+.wl-row td{background:transparent}.wl-row.p1 td{background:color-mix(in srgb,var(--hi) 55%,transparent)}
 .empty{color:var(--ink3);padding:20px;text-align:center}
+.more{display:block;width:100%;padding:10px;background:var(--chip);border:0;color:var(--ink2);font:inherit;cursor:pointer}
+.chg{display:inline-flex;gap:8px;flex-wrap:wrap}
 @media (max-width:640px){header,main{padding-left:14px;padding-right:14px}.grid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><h1>Offerwall Catalogs</h1><span class="sub" id="sub">loading…</span></header>
+<header>
+  <h1>Offerwall Catalogs</h1><span class="sub" id="sub">loading…</span>
+  <span class="spacer"></span>
+  <div class="controls">
+    <div class="seg" id="rangeSeg"><button data-d="7" class="on">7 days</button><button data-d="14">14 days</button><button data-d="30">30 days</button><button data-d="0">All</button></div>
+    <div class="seg" id="platSeg"><button data-p="" class="on">All platforms</button><button data-p="kashkick">KashKick</button><button data-p="freecash">Freecash</button><button data-p="testerup">TesterUp</button></div>
+    <label class="tg"><input type="checkbox" id="wlOnly"> Watchlist only</label>
+  </div>
+</header>
 <main>
-<section><div class="tiles" id="tiles"></div></section>
+<section>
+  <div class="tiles" id="tiles"></div>
+</section>
+<section>
+  <h2>Watchlist <span class="muted small" id="wlNote"></span></h2>
+  <div class="tbl" style="max-height:none"><table id="wl"><thead><tr>
+    <th>Company</th><th>Game</th><th>KashKick</th><th>Freecash</th><th>TesterUp</th><th>Changes in range</th><th>Last event</th>
+  </tr></thead><tbody></tbody></table></div>
+</section>
+<section>
+  <h2>Change log <span class="muted small" id="evNote"></span></h2>
+  <div class="controls" style="margin-bottom:10px">
+    <div class="seg" id="typeSeg"><button data-t="" class="on">All</button><button data-t="added">Entered</button><button data-t="removed">Left</button><button data-t="reward">Reward changed</button><button data-t="milestones">Milestones changed</button></div>
+    <input type="search" id="evq" placeholder="Filter by game…">
+  </div>
+  <div class="tbl" id="evWrap"><table id="ev"><thead><tr><th>When</th><th>Platform</th><th>Event</th><th>Game</th><th>Device</th><th>Details</th></tr></thead><tbody></tbody></table></div>
+</section>
 <section>
   <h2>History</h2>
   <div class="grid2">
-    <div class="card"><h3>Games per run</h3><div class="hint">Number of distinct offers in each platform's catalog, per harvest</div><div id="chartGames"></div><div class="legend" id="legend1"></div></div>
-    <div class="card"><h3>Total advertised reward (USD)</h3><div class="hint">Sum of every offer's headline reward — a rough "size of the wall"</div><div id="chartUsd"></div><div class="legend" id="legend2"></div></div>
+    <div class="card"><h3>Games per run</h3><div class="hint">Distinct offers per harvest. Hollow marks = suspect (partial) harvests, excluded from the change log.</div><div id="chartGames"></div><div class="legend" id="legend1"></div></div>
+    <div class="card"><h3>Total advertised reward (USD)</h3><div class="hint">Sum of every offer's headline reward</div><div id="chartUsd"></div><div class="legend" id="legend2"></div></div>
   </div>
 </section>
 <section>
-  <h2>What changed since the previous run</h2>
-  <div class="grid2" id="changes"></div>
-</section>
-<section>
   <h2>Catalog browser</h2>
-  <div class="controls">
-    <div class="seg" id="platSeg"></div>
+  <div class="controls" style="margin-bottom:10px">
+    <div class="seg" id="bPlatSeg"></div>
     <select id="runSel"></select>
-    <input type="search" id="q" placeholder="Search game, category, milestone…">
+    <input type="search" id="q" placeholder="Search game, company, category, milestone…">
     <select id="typeSel"><option value="">All milestone types</option></select>
     <span class="muted small" id="count"></span>
   </div>
   <div class="tbl"><table id="games"><thead><tr>
-    <th data-k="name">Game / Offer</th><th data-k="cat">Category</th><th data-k="plat">Platform</th>
-    <th class="num" data-k="usd">Reward USD</th><th class="num" data-k="coins">Coins</th><th class="num" data-k="n">Milestones</th><th class="num" data-k="maxdays">Longest limit (days)</th>
+    <th class="sort" data-k="name">Game / Offer</th><th class="sort" data-k="company">Company</th><th class="sort" data-k="cat">Category</th><th class="sort" data-k="plat">Device</th>
+    <th class="num sort" data-k="usd">Reward USD</th><th class="num sort" data-k="n">Milestones</th><th class="num sort" data-k="maxdays">Longest limit (d)</th>
   </tr></thead><tbody></tbody></table></div>
 </section>
 <section>
@@ -85,135 +110,183 @@ tr.ms td{background:var(--chip);padding:0 8px 10px}
 <script>
 const PL = {kashkick:{label:'KashKick',color:'var(--s1)'},freecash:{label:'Freecash',color:'var(--s2)'},testerup:{label:'TesterUp',color:'var(--s3)'}};
 const ORDER = ['kashkick','freecash','testerup'];
+const TYPE = {added:'Entered',removed:'Left',reward:'Reward',milestones:'Milestones'};
 const fmt = n => n==null?'':Number(n).toLocaleString('en-US',{maximumFractionDigits:0});
 const fmt2 = n => n==null?'':Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const tsDate = ts => { const m = ts.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/); return new Date(Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5])); };
 const fmtDate = d => d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-let runs = [], byPlat = {}, cache = {};
+const fmtDay = d => d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+let runs=[], byPlat={}, events=[], watch=[], cache={}, latest={};
+let range=7, platF='', wlOnly=false, typeF='', evLimit=150;
 
-async function loadRuns(){
-  const r = await fetch('runs.jsonl?_='+Date.now()); const txt = await r.text();
-  runs = txt.split('\n').filter(Boolean).map(l=>JSON.parse(l));
-  runs.forEach(x=>{ x.date = x.captured_at ? new Date(x.captured_at) : tsDate(x.ts); });
-  runs.sort((a,b)=>a.date-b.date);
-  byPlat = {}; runs.forEach(x=>{(byPlat[x.platform] ||= []).push(x)});
+async function jsonl(u){ const r=await fetch(u+'?_='+Date.now()); if(!r.ok) return []; return (await r.text()).split('\n').filter(Boolean).map(l=>JSON.parse(l)); }
+async function loadData(rel){ if(!cache[rel]){ const r=await fetch('data/'+rel); cache[rel]=await r.json(); } return cache[rel]; }
+
+// ---- watchlist matching
+function matchCompany(name){
+  const n = norm(name);
+  for(const w of watch) if(w.keys.some(k=>k.length>=4 && n.includes(k))) return w;
+  return null;
 }
-async function loadData(rel){ if(!cache[rel]){ const r = await fetch('data/'+rel); cache[rel] = await r.json(); } return cache[rel]; }
+function tagCo(name){ const w=matchCompany(name); return w?`<span class="co ${w.priority===1?'p1':''}">${esc(w.company)}</span>`:''; }
+
+// ---- filters
+const since = () => range ? new Date(Date.now()-range*864e5) : new Date(0);
+function evFiltered(){
+  const s=since();
+  return events.filter(e => e.date>=s && (!platF||e.platform===platF) && (!typeF||e.type===typeF) && (!wlOnly||matchCompany(e.game)));
+}
 
 function tiles(){
-  const el = document.getElementById('tiles'); el.innerHTML='';
-  for(const p of ORDER){
-    const h = byPlat[p]||[]; if(!h.length) continue;
-    const last = h[h.length-1], prev = h[h.length-2];
-    const d = prev ? last.games - prev.games : null;
-    const delta = d==null?'':`<span class="delta ${d>0?'up':d<0?'down':'muted'}">${d>0?'+':''}${d} vs prev</span>`;
-    el.insertAdjacentHTML('beforeend',`<div class="tile"><div class="lab"><span class="dot" style="background:${PL[p].color}"></span>${PL[p].label}</div>
-      <div class="val">${fmt(last.games)} <span class="meta">games</span>${delta}</div>
-      <div class="meta">${fmt(last.milestones)} milestones · $${fmt(last.total_usd)} total · <span class="${last.integrity==='PASS'?'ok':'fail'}">${last.integrity==='PASS'?'✓ integrity':'✗ '+last.integrity}</span></div>
-      <div class="meta small">${fmtDate(last.date)}</div></div>`);
-  }
-  const all = runs[runs.length-1];
-  document.getElementById('sub').textContent = all ? `${runs.length} runs · last harvest ${fmtDate(all.date)}` : 'no runs yet';
+  const s=since(), evs=events.filter(e=>e.date>=s && (!platF||e.platform===platF) && (!wlOnly||matchCompany(e.game)));
+  const c = t => evs.filter(e=>e.type===t).length;
+  const wlc = evs.filter(e=>matchCompany(e.game)).length;
+  const lastRun = runs[runs.length-1];
+  const plats = ORDER.filter(p=>byPlat[p] && (!platF||p===platF));
+  const gamesNow = plats.reduce((s,p)=>s+byPlat[p][byPlat[p].length-1].games,0);
+  document.getElementById('tiles').innerHTML = `
+    <div class="tile"><div class="lab">Games in catalog now</div><div class="val">${fmt(gamesNow)}</div><div class="meta">${plats.map(p=>PL[p].label+' '+byPlat[p][byPlat[p].length-1].games).join(' · ')}</div></div>
+    <div class="tile"><div class="lab">Entered</div><div class="val up">+${c('added')}</div><div class="meta">${range?`last ${range} days`:'all time'}</div></div>
+    <div class="tile"><div class="lab">Left</div><div class="val down">−${c('removed')}</div><div class="meta">${range?`last ${range} days`:'all time'}</div></div>
+    <div class="tile"><div class="lab">Reward changes</div><div class="val">${c('reward')}</div><div class="meta">headline reward moved</div></div>
+    <div class="tile"><div class="lab">Milestone changes</div><div class="val">${c('milestones')}</div><div class="meta">count of steps changed</div></div>
+    <div class="tile"><div class="lab">Watchlist events</div><div class="val">${wlc}</div><div class="meta">${watch.length} companies tracked</div></div>`;
+  document.getElementById('sub').textContent = lastRun ? `${runs.length} runs · last harvest ${fmtDate(lastRun.date)}` : 'no runs yet';
 }
 
-// ---- line chart (single axis, fixed colors, hover tooltip)
+// ---- watchlist table: one row per watched game that exists (now or in range) on any platform
+function watchTable(){
+  const s=since();
+  const rowsByKey = new Map();   // key: company|normalizedGameName
+  const add = (w, gname) => { const k=w.company+'|'+norm(gname); if(!rowsByKey.has(k)) rowsByKey.set(k,{w,name:gname,pres:{},ev:[]}); return rowsByKey.get(k); };
+  // current presence from latest snapshots
+  for(const p of ORDER){ const L=latest[p]; if(!L) continue;
+    for(const g of L.games){ const w=matchCompany(g.name); if(!w) continue; const r=add(w,g.name); (r.pres[p] ||= []).push(g); } }
+  // events in range
+  for(const e of events){ if(e.date<s) continue; const w=matchCompany(e.game); if(!w) continue; if(platF&&e.platform!==platF) continue; add(w,e.game).ev.push(e); }
+  let rows=[...rowsByKey.values()];
+  if(platF) rows = rows.filter(r=>r.pres[platF]||r.ev.length);
+  rows.sort((a,b)=> (a.w.priority-b.w.priority) || a.w.company.localeCompare(b.w.company) || a.name.localeCompare(b.name));
+  const cell = (r,p) => { const gs=r.pres[p]; if(!gs) return `<span class="pres"><span class="absent">—</span></span>`;
+    return `<span class="pres">${gs.map(g=>`<span title="${esc(g.plat)}">$${fmt(g.usd)} <span class="muted">· ${g.ms.length} steps · ${esc(g.plat)}</span></span>`).join('')}</span>`; };
+  const chg = r => { const c={}; r.ev.forEach(e=>c[e.type]=(c[e.type]||0)+1); const parts=Object.entries(c).map(([t,n])=>`<span class="badge b-${t}">${TYPE[t]} ${n}</span>`); return parts.length?`<span class="chg">${parts.join('')}</span>`:'<span class="muted">no changes</span>'; };
+  const last = r => { if(!r.ev.length) return ''; const e=r.ev.reduce((a,b)=>a.date>b.date?a:b); return `<span class="small">${fmtDate(e.date)} · ${PL[e.platform].label} · ${evDetail(e)}</span>`; };
+  const tb=document.querySelector('#wl tbody');
+  tb.innerHTML = rows.map(r=>`<tr class="wl-row ${r.w.priority===1?'p1':''}"><td>${esc(r.w.company)}</td><td><b>${esc(r.name)}</b></td><td>${cell(r,'kashkick')}</td><td>${cell(r,'freecash')}</td><td>${cell(r,'testerup')}</td><td>${chg(r)}</td><td>${last(r)}</td></tr>`).join('')
+    || `<tr><td colspan="7" class="empty">No watchlist games found in the catalogs${platF?' on this platform':''}. Edit watchlist.json to add games.</td></tr>`;
+  document.getElementById('wlNote').textContent = `— ${rows.length} watched games present or changed ${range?`in the last ${range} days`:''}`;
+}
+
+function evDetail(e){
+  if(e.type==='added') return `entered at $${fmt2(e.usd)} · ${e.milestones} milestones`;
+  if(e.type==='removed') return `left (was $${fmt2(e.usd)} · ${e.milestones} milestones)`;
+  if(e.type==='reward'){ const d=e.after-e.before; return `$${fmt2(e.before)} → $${fmt2(e.after)} <span class="${d>0?'up':'down'}">(${d>0?'+':''}${fmt2(d)})</span>`; }
+  if(e.type==='milestones'){ const d=e.after-e.before; return `${e.before} → ${e.after} milestones <span class="${d>0?'up':'down'}">(${d>0?'+':''}${d})</span>`; }
+  return '';
+}
+function eventTable(){
+  const q=norm(document.getElementById('evq').value);
+  let evs=evFiltered().filter(e=>!q||norm(e.game).includes(q));
+  evs.sort((a,b)=> (b.date-a.date) || ((matchCompany(b.game)?1:0)-(matchCompany(a.game)?1:0)));
+  // watchlist first within the same run
+  const groups=new Map(); evs.forEach(e=>{ const k=e.date.toDateString(); (groups.get(k)||groups.set(k,[]).get(k)).push(e); });
+  let html='', n=0, total=evs.length;
+  for(const [k,list] of groups){
+    if(n>=evLimit) break;
+    list.sort((a,b)=> ((matchCompany(b.game)?.priority?10-matchCompany(b.game).priority:0)-(matchCompany(a.game)?.priority?10-matchCompany(a.game).priority:0)) || (b.date-a.date));
+    html+=`<tr><td colspan="6" class="day">${fmtDay(list[0].date)} <span class="muted" style="font-weight:400">· ${list.length} events</span></td></tr>`;
+    for(const e of list){ if(n++>=evLimit) break;
+      html+=`<tr><td class="small muted" style="white-space:nowrap">${e.date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})}</td><td><span class="dot" style="background:${PL[e.platform].color}"></span>${PL[e.platform].label}</td><td><span class="badge b-${e.type}">${TYPE[e.type]}</span></td><td>${esc(e.game)}${tagCo(e.game)}</td><td class="small muted">${esc(e.plat)}</td><td>${evDetail(e)}</td></tr>`; }
+  }
+  document.querySelector('#ev tbody').innerHTML = html || `<tr><td colspan="6" class="empty">No events in this range.</td></tr>`;
+  const wrap=document.getElementById('evWrap'); wrap.querySelector('.more')?.remove();
+  if(total>evLimit){ const b=document.createElement('button'); b.className='more'; b.textContent=`Show more (${total-evLimit} remaining)`; b.onclick=()=>{evLimit+=300; eventTable();}; wrap.appendChild(b); }
+  document.getElementById('evNote').textContent = `— ${total} events ${range?`in the last ${range} days`:'all time'}${platF?' · '+PL[platF].label:''}${wlOnly?' · watchlist only':''}`;
+}
+
+// ---- charts
 function lineChart(mount, legendEl, key, fmtY){
   const W=560,H=240,m={t:14,r:16,b:30,l:52};
   const series = ORDER.filter(p=>byPlat[p]).map(p=>({p,pts:byPlat[p].map(r=>({x:r.date,y:r[key],r}))}));
-  const xs = runs.map(r=>r.date), x0=Math.min(...xs), x1=Math.max(...xs), span = Math.max(x1-x0, 3600e3);
+  const xs = runs.map(r=>r.date), x0=Math.min(...xs), x1=Math.max(...xs), span=Math.max(x1-x0,3600e3);
   const ymax = Math.max(1,...series.flatMap(s=>s.pts.map(q=>q.y)));
-  const nice = Math.pow(10,Math.floor(Math.log10(ymax))); const step = [1,2,2.5,5,10].map(k=>k*nice).find(k=>ymax/k<=5); const yTop = Math.ceil(ymax/step)*step;
-  const X = d => m.l + (d-x0)/span*(W-m.l-m.r), Y = v => H-m.b - v/yTop*(H-m.t-m.b);
-  let g = '';
-  for(let v=0; v<=yTop; v+=step) g += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink2)">${fmtY(v)}</text>`;
-  const ticks = 4, seenT = new Set(); for(let i=0;i<=ticks;i++){ const d=new Date(x0+span*i/ticks); const lab = span>3*864e5 ? d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) : d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); if(seenT.has(lab)) continue; seenT.add(lab); g += `<text x="${X(d)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--ink2)">${lab}</text>`; }
-  let paths='', dots='';
+  const nice=Math.pow(10,Math.floor(Math.log10(ymax))); const step=[1,2,2.5,5,10].map(k=>k*nice).find(k=>ymax/k<=5); const yTop=Math.ceil(ymax/step)*step;
+  const X=d=>m.l+(d-x0)/span*(W-m.l-m.r), Y=v=>H-m.b-v/yTop*(H-m.t-m.b);
+  let g='';
+  for(let v=0;v<=yTop;v+=step) g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink2)">${fmtY(v)}</text>`;
+  const seen=new Set(); for(let i=0;i<=4;i++){ const d=new Date(x0+span*i/4); const lab=span>3*864e5?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); if(seen.has(lab)) continue; seen.add(lab); g+=`<text x="${X(d)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--ink2)">${lab}</text>`; }
+  let paths='',dots='';
   series.forEach(s=>{
-    const d = s.pts.map((q,i)=>(i?'L':'M')+X(q.x).toFixed(1)+' '+Y(q.y).toFixed(1)).join(' ');
-    paths += `<path d="${d}" fill="none" stroke="${PL[s.p].color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-    s.pts.forEach(q=>{ dots += `<circle cx="${X(q.x)}" cy="${Y(q.y)}" r="4" fill="${PL[s.p].color}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(PL[s.p].label+' · '+fmtDate(q.x)+' · '+fmtY(q.y))}"><title></title></circle>`; });
-    const last = s.pts[s.pts.length-1];
-    paths += `<text x="${X(last.x)+8}" y="${Y(last.y)+4}" font-size="11" fill="var(--ink2)">${fmtY(last.y)}</text>`;
+    const d=s.pts.map((q,i)=>(i?'L':'M')+X(q.x).toFixed(1)+' '+Y(q.y).toFixed(1)).join(' ');
+    paths+=`<path d="${d}" fill="none" stroke="${PL[s.p].color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s.pts.forEach(q=>{ const sus=q.r.suspect; dots+=`<circle cx="${X(q.x)}" cy="${Y(q.y)}" r="4" fill="${sus?'var(--surface)':PL[s.p].color}" stroke="${sus?PL[s.p].color:'var(--surface)'}" stroke-width="2" data-tip="${esc(PL[s.p].label+' · '+fmtDate(q.x)+' · '+fmtY(q.y)+(sus?' · suspect harvest':''))}"/>`; });
+    const last=s.pts[s.pts.length-1]; paths+=`<text x="${X(last.x)+8}" y="${Y(last.y)+4}" font-size="11" fill="var(--ink2)">${fmtY(last.y)}</text>`;
   });
-  mount.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}${paths}${dots}</svg>`;
-  legendEl.innerHTML = series.map(s=>`<span><i style="background:${PL[s.p].color}"></i>${PL[s.p].label}</span>`).join('');
+  mount.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${g}${paths}${dots}</svg>`;
+  legendEl.innerHTML=series.map(s=>`<span><i style="background:${PL[s.p].color}"></i>${PL[s.p].label}</span>`).join('');
 }
-const tip = document.getElementById('tip');
+const tip=document.getElementById('tip');
 document.addEventListener('mousemove',e=>{ const t=e.target.closest('[data-tip]'); if(!t){tip.style.display='none';return;} tip.textContent=t.dataset.tip; tip.style.display='block'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY+12)+'px'; });
 
-// ---- changes vs previous
-async function changes(){
-  const el = document.getElementById('changes'); el.innerHTML='';
-  for(const p of ORDER){
-    const h = byPlat[p]||[]; if(!h.length) continue;
-    const last = h[h.length-1], prev = h[h.length-2];
-    let body;
-    if(!prev){ body = `<div class="muted">First run — nothing to compare yet.</div>`; }
-    else {
-      const [a,b] = await Promise.all([loadData(prev.data), loadData(last.data)]);
-      const key = g => g.id+'|'+g.plat;
-      const A = new Map(a.games.map(g=>[key(g),g])), B = new Map(b.games.map(g=>[key(g),g]));
-      const added = [...B.values()].filter(g=>!A.has(key(g))), removed = [...A.values()].filter(g=>!B.has(key(g)));
-      const changed = [...B.values()].filter(g=>A.has(key(g)) && (A.get(key(g)).usd!==g.usd || A.get(key(g)).ms.length!==g.ms.length));
-      const chips = (arr,cls) => arr.length ? `<div class="chips">${arr.slice(0,40).map(g=>`<span class="chip">${esc(g.name)} <span class="muted">$${fmt(g.usd)}</span></span>`).join('')}${arr.length>40?`<span class="chip muted">+${arr.length-40} more</span>`:''}</div>` : `<span class="muted">none</span>`;
-      body = `<div class="small muted" style="margin-bottom:6px">vs ${fmtDate(prev.date)}</div>
-        <div><b class="up">+${added.length} new</b> ${chips(added)}</div>
-        <div style="margin-top:8px"><b class="down">−${removed.length} removed</b> ${chips(removed)}</div>
-        <div style="margin-top:8px"><b>${changed.length} reward/milestone changes</b> ${chips(changed)}</div>`;
-    }
-    el.insertAdjacentHTML('beforeend',`<div class="card"><h3><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PL[p].color};margin-right:6px"></span>${PL[p].label}</h3>${body}</div>`);
-  }
-}
-
 // ---- browser
-let curPlat = null, curRun=null, sortK='usd', sortDir=-1, rows=[];
-function buildSeg(){ const s=document.getElementById('platSeg'); s.innerHTML = ORDER.filter(p=>byPlat[p]).map(p=>`<button data-p="${p}" class="${p===curPlat?'on':''}">${PL[p].label}</button>`).join('');
+let curPlat=null, curRun=null, sortK='usd', sortDir=-1, rows=[];
+function buildSeg(){ const s=document.getElementById('bPlatSeg'); s.innerHTML=ORDER.filter(p=>byPlat[p]).map(p=>`<button data-p="${p}" class="${p===curPlat?'on':''}">${PL[p].label}</button>`).join('');
   s.querySelectorAll('button').forEach(b=>b.onclick=()=>{curPlat=b.dataset.p; buildSeg(); buildRunSel(); loadBrowser();}); }
-function buildRunSel(){ const h=(byPlat[curPlat]||[]).slice().reverse(); const sel=document.getElementById('runSel'); sel.innerHTML=h.map(r=>`<option value="${r.data}">${fmtDate(r.date)} — ${r.games} games</option>`).join(''); curRun=h[0]?.data; sel.onchange=()=>{curRun=sel.value; loadBrowser();}; }
+function buildRunSel(){ const h=(byPlat[curPlat]||[]).slice().reverse(); const sel=document.getElementById('runSel'); sel.innerHTML=h.map(r=>`<option value="${r.data}">${fmtDate(r.date)} — ${r.games} games${r.suspect?' (suspect)':''}</option>`).join(''); curRun=h[0]?.data; sel.onchange=()=>{curRun=sel.value; loadBrowser();}; }
 async function loadBrowser(){
-  const d = await loadData(curRun);
-  rows = d.games.map(g=>({...g, n:g.ms.length, maxdays: Math.max(0,...g.ms.map(m=>+m.days||0))||null, types:[...new Set(g.ms.map(m=>m.ty))]}));
-  const types = [...new Set(rows.flatMap(g=>g.types))].sort(); const ts=document.getElementById('typeSel'); const cur=ts.value;
-  ts.innerHTML = '<option value="">All milestone types</option>'+types.map(t=>`<option ${t===cur?'selected':''}>${esc(t)}</option>`).join('');
+  const d=await loadData(curRun);
+  rows=d.games.map(g=>({...g, company:matchCompany(g.name)?.company||'', n:g.ms.length, maxdays:Math.max(0,...g.ms.map(m=>+m.days||0))||null, types:[...new Set(g.ms.map(m=>m.ty))]}));
+  const types=[...new Set(rows.flatMap(g=>g.types))].sort(); const ts=document.getElementById('typeSel'); const cur=ts.value;
+  ts.innerHTML='<option value="">All milestone types</option>'+types.map(t=>`<option ${t===cur?'selected':''}>${esc(t)}</option>`).join('');
   render();
 }
 function render(){
-  const q = document.getElementById('q').value.trim().toLowerCase(), ty = document.getElementById('typeSel').value;
-  let list = rows.filter(g => (!ty || g.types.includes(ty)) && (!q || (g.name+' '+g.cat+' '+g.plat+' '+g.ms.map(m=>m.t).join(' ')).toLowerCase().includes(q)));
-  list.sort((a,b)=>{ const x=a[sortK],y=b[sortK]; if(x==null) return 1; if(y==null) return -1; return (typeof x==='number'? x-y : String(x).localeCompare(String(y)))*sortDir; });
-  const tb = document.querySelector('#games tbody');
-  tb.innerHTML = list.map((g,i)=>`<tr class="game" data-i="${i}"><td>${esc(g.name)}</td><td>${esc(g.cat)}</td><td>${esc(g.plat)}</td><td class="num">${fmt2(g.usd)}</td><td class="num">${fmt(g.coins)}</td><td class="num">${g.n}</td><td class="num">${g.maxdays??''}</td></tr>`).join('') || `<tr><td colspan="7" class="empty">No games match.</td></tr>`;
-  document.getElementById('count').textContent = `${list.length} of ${rows.length} games · ${list.reduce((s,g)=>s+g.n,0)} milestones`;
+  const q=document.getElementById('q').value.trim().toLowerCase(), ty=document.getElementById('typeSel').value;
+  let list=rows.filter(g=>(!wlOnly||g.company) && (!ty||g.types.includes(ty)) && (!q||(g.name+' '+g.company+' '+g.cat+' '+g.plat+' '+g.ms.map(m=>m.t).join(' ')).toLowerCase().includes(q)));
+  list.sort((a,b)=>{ const x=a[sortK],y=b[sortK]; if(x==null||x==='') return 1; if(y==null||y==='') return -1; return (typeof x==='number'?x-y:String(x).localeCompare(String(y)))*sortDir; });
+  const tb=document.querySelector('#games tbody');
+  tb.innerHTML=list.map((g,i)=>`<tr class="game ${g.company?'wl-row':''}" data-i="${i}"><td>${esc(g.name)}</td><td>${g.company?tagCo(g.name):''}</td><td>${esc(g.cat)}</td><td>${esc(g.plat)}</td><td class="num">${fmt2(g.usd)}</td><td class="num">${g.n}</td><td class="num">${g.maxdays??''}</td></tr>`).join('') || `<tr><td colspan="7" class="empty">No games match.</td></tr>`;
+  document.getElementById('count').textContent=`${list.length} of ${rows.length} games · ${list.reduce((s,g)=>s+g.n,0)} milestones`;
   tb.querySelectorAll('tr.game').forEach(tr=>tr.onclick=()=>{
-    const nx = tr.nextElementSibling; if(nx && nx.classList.contains('ms')){ nx.remove(); return; }
-    const g = list[+tr.dataset.i];
-    const ms = g.ms.filter(m=>!ty||m.ty===ty||true);
-    tr.insertAdjacentHTML('afterend',`<tr class="ms"><td colspan="7"><table class="mstab"><thead><tr><th>#</th><th>Milestone</th><th>Type</th><th class="num">USD</th><th class="num">Coins</th><th class="num">Days</th></tr></thead><tbody>${ms.map(m=>`<tr><td>${m.n}</td><td>${esc(m.t)}</td><td>${esc(m.ty)}</td><td class="num">${fmt2(m.usd)}</td><td class="num">${fmt(m.c)}</td><td class="num">${m.days??''}</td></tr>`).join('')}</tbody></table></td></tr>`);
+    const nx=tr.nextElementSibling; if(nx&&nx.classList.contains('ms')){nx.remove();return;}
+    const g=list[+tr.dataset.i];
+    tr.insertAdjacentHTML('afterend',`<tr class="ms"><td colspan="7"><table class="mstab"><thead><tr><th>#</th><th>Milestone</th><th>Type</th><th class="num">USD</th><th class="num">Coins</th><th class="num">Days</th></tr></thead><tbody>${g.ms.map(m=>`<tr><td>${m.n}</td><td>${esc(m.t)}</td><td>${esc(m.ty)}</td><td class="num">${fmt2(m.usd)}</td><td class="num">${fmt(m.c)}</td><td class="num">${m.days??''}</td></tr>`).join('')}</tbody></table></td></tr>`);
   });
 }
 document.getElementById('q').addEventListener('input',render); document.getElementById('typeSel').addEventListener('change',render);
-document.querySelectorAll('#games th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir = ['usd','coins','n','maxdays'].includes(k)?-1:1;} render(); });
+document.querySelectorAll('#games th.sort').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=['usd','n','maxdays'].includes(k)?-1:1;} render(); });
 
 function runsTable(){
-  const tb = document.querySelector('#runs tbody');
-  tb.innerHTML = runs.slice().reverse().map(r=>{
-    const fails = (r.checks||[]).filter(c=>!c.ok).map(c=>c.name+': '+c.detail).join(' · ');
-    return `<tr><td>${fmtDate(r.date)}</td><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${PL[r.platform]?.color};margin-right:6px"></span>${PL[r.platform]?.label||r.platform}</td><td class="num">${fmt(r.games)}</td><td class="num">${fmt(r.milestones)}</td><td class="num">${fmt(r.total_usd)}</td><td class="${r.integrity==='PASS'?'ok':'fail'}" title="${esc(fails)}">${r.integrity}${fails?' ⚠':''}</td><td class="small"><a href="output/${esc(r.xlsx)}">xlsx</a> · <a href="data/${esc(r.data)}">json</a></td></tr>`;
+  document.querySelector('#runs tbody').innerHTML=runs.slice().reverse().map(r=>{
+    const fails=(r.checks||[]).filter(c=>!c.ok).map(c=>c.name+': '+c.detail).join(' · ');
+    return `<tr><td>${fmtDate(r.date)}${r.captured_at?'':' <span class="muted small">(time unknown)</span>'}</td><td><span class="dot" style="background:${PL[r.platform]?.color}"></span>${PL[r.platform]?.label||r.platform}</td><td class="num">${fmt(r.games)}${r.suspect?' <span class="muted small">suspect</span>':''}</td><td class="num">${fmt(r.milestones)}</td><td class="num">${fmt(r.total_usd)}</td><td class="${r.integrity==='PASS'?'ok':'fail'}" title="${esc(fails)}">${r.integrity}${fails?' ⚠':''}</td><td class="small"><a href="output/${esc(r.xlsx)}">xlsx</a> · <a href="data/${esc(r.data)}">json</a></td></tr>`;
   }).join('');
 }
 
+function refresh(){ tiles(); watchTable(); eventTable(); render(); }
+document.getElementById('rangeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ range=+b.dataset.d; b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); evLimit=150; refresh(); });
+document.getElementById('platSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ platF=b.dataset.p; b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); evLimit=150; refresh(); });
+document.getElementById('typeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ typeF=b.dataset.t; b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); evLimit=150; eventTable(); });
+document.getElementById('wlOnly').onchange=e=>{ wlOnly=e.target.checked; evLimit=150; refresh(); };
+document.getElementById('evq').addEventListener('input',()=>{evLimit=150; eventTable();});
+
 (async function(){
   try{
-    await loadRuns();
+    const [R,E,W]=await Promise.all([jsonl('runs.jsonl'), jsonl('events.jsonl'), fetch('watchlist.json?_='+Date.now()).then(r=>r.ok?r.json():{companies:[]}).catch(()=>({companies:[]}))]);
+    runs=R; runs.forEach(x=>{x.date=x.captured_at?new Date(x.captured_at):tsDate(x.ts);}); runs.sort((a,b)=>a.date-b.date);
+    byPlat={}; runs.forEach(x=>{(byPlat[x.platform] ||= []).push(x)});
+    events=E; events.forEach(e=>{e.date=e.captured_at?new Date(e.captured_at):tsDate(e.ts);});
+    watch=(W.companies||[]).map(c=>({company:c.name, priority:c.priority||9, keys:[...(c.games||[]),...(c.aliases||[])].map(norm).filter(Boolean)}));
     if(!runs.length){ document.getElementById('sub').textContent='no runs yet'; return; }
-    tiles();
-    lineChart(document.getElementById('chartGames'), document.getElementById('legend1'), 'games', v=>fmt(v));
-    lineChart(document.getElementById('chartUsd'), document.getElementById('legend2'), 'total_usd', v=>'$'+fmt(v));
+    for(const p of ORDER){ if(byPlat[p]){ const good=byPlat[p].filter(r=>!r.suspect); const l=(good.length?good:byPlat[p]).slice(-1)[0]; latest[p]=await loadData(l.data); } }
+    curPlat=ORDER.find(p=>byPlat[p]); buildSeg(); buildRunSel(); await loadBrowser();
+    tiles(); watchTable(); eventTable();
+    lineChart(document.getElementById('chartGames'),document.getElementById('legend1'),'games',v=>fmt(v));
+    lineChart(document.getElementById('chartUsd'),document.getElementById('legend2'),'total_usd',v=>'$'+fmt(v));
     runsTable();
-    curPlat = ORDER.find(p=>byPlat[p]); buildSeg(); buildRunSel(); await loadBrowser();
-    await changes();
-  }catch(e){ document.getElementById('sub').textContent = 'failed to load: '+e.message; console.error(e); }
+  }catch(e){ document.getElementById('sub').textContent='failed to load: '+e.message; console.error(e); }
 })();
 </script>
 </body>
