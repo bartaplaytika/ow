@@ -1,0 +1,7 @@
+{
+ "_help": "Wording of the automatic email. greeting/signoff/signature are free text; max_findings caps Notable Findings (the rest stay in the tables). Re-run: node build_email.js && python3 publish_to_github.py",
+ "greeting": "Hi all,",
+ "signoff": "Best regards,",
+ "signature": "Bar Taitel\nPlaytika · Offerwall competitive tracking",
+ "max_findings": 10
+}
