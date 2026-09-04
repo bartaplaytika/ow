@@ -64,11 +64,11 @@ tr.spend td{background:#fdf3f2}.bar{display:inline-block;height:6px;background:#
 <script src="email_core.js"></script>
 <script>
 'use strict';
-let D=null; const S={win:'7',q:'',fs:'',fw:''};
+let D=null, ECFG={}; const S={win:'7',q:'',fs:'',fw:''};
 const esc=EC.esc, fmt=EC.fmt, longDate=EC.longDate; const C=()=>D.colors; const pubName=p=>EC.pubName(D,p);
 const O=()=>({win:S.win,q:S.q,fs:S.fs,fw:S.fw});
 const chosenDate=()=>EC.chosenDate(D,S.win), baselineDate=(s,c)=>EC.baselineDate(D,s,c), pres=(s,d,k)=>EC.pres(D,s,d,k), cellOf=(s,k)=>EC.cellOf(D,O(),s,k);
-const focusTable=f=>EC.focusTable(D,O(),f), pubTable=f=>EC.pubTable(D,O(),f), legendHtml=()=>EC.legendHtml(D), buildEmail=()=>EC.buildEmail(D,{...O(),baseUrl:location.href.replace(/[?#].*$/,'').replace(/[^/]*$/,'')}), emailText=h=>EC.emailText(h);
+const focusTable=f=>EC.focusTable(D,O(),f), pubTable=f=>EC.pubTable(D,O(),f), legendHtml=()=>EC.legendHtml(D), buildEmail=()=>EC.buildEmail(D,{...O(),baseUrl:location.href.replace(/[?#].*$/,'').replace(/[^/]*$/,''),cfg:ECFG,maxFindings:ECFG.max_findings}), emailText=h=>EC.emailText(h);
 
 const put=(sel,prop,val)=>{ const n=document.querySelector(sel); if(n) n[prop]=val; };
 function audit(ids){ const missing=ids.filter(i=>!document.getElementById(i)); if(missing.length) throw new Error('audit: missing ids '+missing.join(', ')); }
@@ -167,7 +167,7 @@ function init(){
   if(P.get('tab')){ const b=document.querySelector(`#tabs button[data-t="${P.get('tab')}"]`); if(b) b.click(); }
   if(P.get('game')){ const gk=P.get('game'); if(D.games[gk]){ if(P.get('wall')&&D.sites.includes(P.get('wall'))) openWall(P.get('wall'),[gk]); else openCompare([gk]); } }
 }
-fetch('dash_data.json?_='+Date.now()).then(r=>r.json()).then(d=>{ D=d; init(); }).catch(e=>{ document.body.insertAdjacentHTML('afterbegin',`<div style="padding:20px;color:#990000">Failed to load dash_data.json: ${esc(e.message)}</div>`); console.error(e); });
+fetch('email_config.json?_='+Date.now()).then(r=>r.ok?r.json():{}).then(c=>{ECFG=c||{};}).catch(()=>{}).then(()=>fetch('dash_data.json?_='+Date.now())).then(r=>r.json()).then(d=>{ D=d; init(); }).catch(e=>{ document.body.insertAdjacentHTML('afterbegin',`<div style="padding:20px;color:#990000">Failed to load dash_data.json: ${esc(e.message)}</div>`); console.error(e); });
 </script>
 </body>
 </html>
