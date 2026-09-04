@@ -44,7 +44,7 @@ tr.spend td{background:#fdf3f2}.bar{display:inline-block;height:6px;background:#
 <header><h1>Offerwall Tracker</h1><span class="chip" id="checkChip"></span><span class="spacer"></span><a href="overview.html">Trends &amp; change log ›</a></header>
 <div class="toolbar">
   <div class="tabs" id="tabs"><button data-t="focus" class="on">Focus matrix</button><button data-t="pub">By publisher</button><button data-t="cat">Full catalog</button><button data-t="hist">History search</button></div>
-  <label>Change over <select id="win"><option value="1">Last 24 hours</option><option value="7">Last week</option><option value="30">Last month</option><option value="365">Last year</option></select></label>
+  <label>Change over <select id="win"><option value="1">Last 24 hours</option><option value="7" selected>Last week</option><option value="30">Last month</option><option value="365">Last year</option></select></label>
   <span id="baselineNote"></span>
   <input type="search" id="q" placeholder="Filter by game or publisher">
   <select id="fs"><option value="">Any status</option><option>Added</option><option>Remains</option><option>Removed</option><option>Not Found</option></select>
@@ -63,9 +63,9 @@ tr.spend td{background:#fdf3f2}.bar{display:inline-block;height:6px;background:#
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
-let D=null; const S={win:'1',q:'',fs:'',fw:''};
+let D=null; const S={win:'7',q:'',fs:'',fw:''};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fmt=v=>{ v=+v||0; const s=Math.abs(v-Math.round(v))<0.005 ? Math.round(v).toLocaleString('en-US') : v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); return '$'+s; };
+const fmt=v=>'$'+Math.round(+v||0).toLocaleString('en-US');   // whole dollars everywhere, by request
 const longDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 const put=(sel,prop,val)=>{ const n=document.querySelector(sel); if(n) n[prop]=val; };
 function audit(ids){ const missing=ids.filter(i=>!document.getElementById(i)); if(missing.length) throw new Error('audit: missing ids '+missing.join(', ')); }
@@ -200,7 +200,8 @@ document.addEventListener('click',e=>{ const st=e.target.closest('td.st[data-wal
 // ---------- KPIs (spec §4.2)
 function renderKpis(){
   const cards=D.sites.map(s=>{ const ds=D.dates[s]; const d=ds[ds.length-1], p=ds[ds.length-2]; const n=D.date_runs[s][d].games, pn=p?D.date_runs[s][p].games:null; const dl=pn==null?'':`<span style="color:${n-pn>=0?C().up:C().down}">${n-pn>=0?'+':'−'}${Math.abs(n-pn)}</span> vs previous capture`;
-    return `<div class="kpi"><div class="l">${D.site_label[s]} · ${d}</div><div class="v">${n}</div><div class="d">offers ${dl}</div></div>`; }).join('');
+    const caps=D.date_runs[s][d].captures||1;
+    return `<div class="kpi"><div class="l">${D.site_label[s]} · ${d}</div><div class="v">${n}</div><div class="d">offers ${dl}${caps>1?` · ${caps} captures merged`:''}</div></div>`; }).join('');
   const listed=D.block1.filter(b=>D.sites.some(s=>pres(s,D.latest[s],b.keys))).length;
   put('#kpis','innerHTML',cards+`<div class="kpi"><div class="l">Focus games listed</div><div class="v" id="kFocus">${listed}/${D.block1.length}</div><div class="d">on at least one wall</div></div><div class="kpi"><div class="l">Competitor extras</div><div class="v">${D.block2.length}</div><div class="d">not on the focus list</div></div>`);
 }
