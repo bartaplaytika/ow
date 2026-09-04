@@ -41,7 +41,7 @@ tr.spend td{background:#fdf3f2}.bar{display:inline-block;height:6px;background:#
 </style>
 </head>
 <body>
-<header><h1>Offerwall Tracker</h1><span class="chip" id="checkChip"></span><span class="spacer"></span><a href="status.html">Harvest status</a><a href="overview.html">Trends &amp; change log ›</a></header>
+<header><h1>Offerwall Tracker</h1><span class="chip" id="checkChip"></span><span class="spacer"></span><a href="email.html">Weekly email</a><a href="status.html">Harvest status</a><a href="overview.html">Trends &amp; change log ›</a></header>
 <div class="toolbar">
   <div class="tabs" id="tabs"><button data-t="focus" class="on">Focus matrix</button><button data-t="pub">By publisher</button><button data-t="cat">Full catalog</button><button data-t="hist">History search</button></div>
   <label>Change over <select id="win"><option value="1">Last 24 hours</option><option value="7" selected>Last week</option><option value="30">Last month</option><option value="365">Last year</option></select></label>
@@ -61,93 +61,24 @@ tr.spend td{background:#fdf3f2}.bar{display:inline-block;height:6px;background:#
 <dialog id="panel"><div class="dhead"><h3 id="panelTitle"></h3><button class="btn" onclick="document.getElementById('panel').close()">Close</button></div><div class="dbody" id="panelBody"></div></dialog>
 <dialog id="dlg"><div class="dhead"><h3>Email preview</h3><button class="btn" id="copySubj">Copy subject</button><button class="btn primary" id="copyBody">Copy email body</button><button class="btn" onclick="document.getElementById('dlg').close()">Close</button></div><div class="dbody"><div class="sub" id="subjLine" style="margin-bottom:8px"></div><div id="emailBody"></div></div></dialog>
 <div class="toast" id="toast"></div>
+<script src="email_core.js"></script>
 <script>
 'use strict';
 let D=null; const S={win:'7',q:'',fs:'',fw:''};
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fmt=v=>'$'+Math.round(+v||0).toLocaleString('en-US');   // whole dollars everywhere, by request
-const longDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+const esc=EC.esc, fmt=EC.fmt, longDate=EC.longDate; const C=()=>D.colors; const pubName=p=>EC.pubName(D,p);
+const O=()=>({win:S.win,q:S.q,fs:S.fs,fw:S.fw});
+const chosenDate=()=>EC.chosenDate(D,S.win), baselineDate=(s,c)=>EC.baselineDate(D,s,c), pres=(s,d,k)=>EC.pres(D,s,d,k), cellOf=(s,k)=>EC.cellOf(D,O(),s,k);
+const focusTable=f=>EC.focusTable(D,O(),f), pubTable=f=>EC.pubTable(D,O(),f), legendHtml=()=>EC.legendHtml(D), buildEmail=()=>EC.buildEmail(D,O()), emailText=h=>EC.emailText(h);
+
 const put=(sel,prop,val)=>{ const n=document.querySelector(sel); if(n) n[prop]=val; };
 function audit(ids){ const missing=ids.filter(i=>!document.getElementById(i)); if(missing.length) throw new Error('audit: missing ids '+missing.join(', ')); }
-const pubName=p=>(D.publisher_display&&D.publisher_display[p])||p;
 const toast=m=>{ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); };
 
 // ---------- time (spec §3.4): the browser resolves time
-function statusOf(now,before,hasPrev){ if(!hasPrev) return now?'Added':'Not Found'; if(now) return before?'Remains':'Added'; return before?'Removed':'Not Found'; }
-function earliestDate(){ return D.sites.map(s=>D.dates[s][0]).filter(Boolean).sort()[0]; }
-function chosenDate(){ const d=new Date(D.check_date+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()-(+S.win)); let iso=d.toISOString().slice(0,10); const e=earliestDate(); return {date: iso<e?e:iso, clamped: iso<e}; }
-function baselineDate(site,chosen){ const ds=D.dates[site]||[]; const latest=ds[ds.length-1]; let b=null; for(const d of ds){ if(d<=chosen && d<latest) b=d; } return b; }
-function pres(site,date,keys){ const day=date&&D.presence[site]&&D.presence[site][date]; if(!day) return null; let best=null; for(const k of keys){ const r=day[k]; if(r && (!best || r[0]>best[0])) best=r; } return best; }
-function cellOf(site,keys){
-  const latest=D.latest[site]; const {date:chosen}=chosenDate(); const base=baselineDate(site,chosen);
-  const now=pres(site,latest,keys), before=base?pres(site,base,keys):null;
-  const st=statusOf(!!now,!!before,!!base);
-  const c={st,now,before,base,dReward:null,dTasks:null};
-  if(now&&before){ if(Math.abs(now[0]-before[0])>=0.01) c.dReward=now[0]-before[0]; if(now[1]!==before[1]) c.dTasks=now[1]-before[1]; }
-  return c;
-}
-const C=()=>D.colors;
-function cellHtml(site,keys,clickable=true){
-  const c=cellOf(site,keys), [bg,fg]=C()[c.st];
-  let inner='&nbsp;';
-  if(c.now){ inner=`<b>${fmt(c.now[0])}</b> ${c.now[1]?`(${c.now[1]} milestones)`:'<span style="color:#888">(milestones not captured)</span>'}`;
-    const mv=[]; if(c.dReward!=null) mv.push(`<span style="color:${c.dReward>0?C().up:C().down}">${c.dReward>0?'▲':'▼'} ${fmt(Math.abs(c.dReward))}</span>`);
-    if(c.dTasks!=null) mv.push(`<span style="color:${c.dTasks>0?C().up:C().down}">${c.dTasks>0?'▲':'▼'} ${Math.abs(c.dTasks)} milestones</span>`);
-    if(mv.length) inner+=`<span class="mv">${mv.join(' · ')}</span>`; }
-  return `<td class="st" style="background:${bg};color:${fg};text-align:center" data-st="${c.st}" ${clickable?`data-wall="${site}" data-keys="${esc(keys.join('||'))}"`:''}>${inner}</td>`;
-}
-function legendHtml(){ return Object.entries(C()).filter(([k])=>!['up','down'].includes(k)).map(([k,[bg]])=>`<span><i style="background:${bg}"></i>${k}</span>`).join('') + `<span style="margin-left:6px">▲ / ▼ change vs last check</span>`; }
-
 // ---------- focus matrix (spec §4.3)
-function rowMatches(row){
-  const txt=(row.genre+' '+row.game+' '+row.publisher).toLowerCase();
-  if(S.q && !txt.includes(S.q.toLowerCase())) return false;
-  if(S.fs || S.fw){ const walls=S.fw?[S.fw]:D.sites; const sts=walls.map(w=>cellOf(w,row.keys).st); if(S.fs && !sts.includes(S.fs)) return false; if(!S.fs && S.fw && !['Added','Remains','Removed'].includes(sts[0])) return false; }
-  return true;
-}
-function matrixRows(rows, forEmail){
-  let html='', i=0;
-  while(i<rows.length){ let j=i; while(j<rows.length && rows[j].genre===rows[i].genre) j++;
-    for(let k=i;k<j;k++){ const r=rows[k];
-      const name=forEmail?esc(r.game):`<span class="gname" data-keys="${esc(r.keys.join('||'))}">${esc(r.game)}</span>${r.loose?` <span class="loose" title="Matched as ${esc(D.games[r.keys[0]]?.name||'')}">≈</span>`:''}`;
-      html+=`<tr>${k===i?`<td class="genre" rowspan="${j-i}"${forEmail?' style="background:#fafbfc;color:#555;vertical-align:top"':''}>${esc(r.genre)}</td>`:''}<td>${name}</td><td>${esc(pubName(r.publisher))||'<span style="color:#999">unattributed</span>'}</td>${D.sites.map(s=>cellHtml(s,r.keys,!forEmail)).join('')}</tr>`; }
-    i=j; }
-  return html;
-}
-function focusTable(forEmail=false){
-  const b1=D.block1.filter(rowMatches), b2=D.block2.filter(rowMatches);
-  const head=`<thead><tr><th>Genre</th><th>Game</th><th>Publisher</th>${D.sites.map(s=>`<th style="text-align:center">${D.site_label[s]}</th>`).join('')}</tr></thead>`;
-  const sep=b2.length?`<tr class="sep"><td colspan="${3+D.sites.length}"${forEmail?' style="background:#e9edf2;font-style:italic;font-weight:600"':''}>Other titles from publishers we track</td></tr>`:'';
-  return head+'<tbody>'+matrixRows(b1,forEmail)+sep+matrixRows(b2,forEmail)+'</tbody>';
-}
 function renderFocus(){ put('#legend','innerHTML',legendHtml()); put('#focusTbl','innerHTML',focusTable(false)); }
 
 // ---------- publishers (spec §4.4)
-function pubStats(){
-  const {date:chosen}=chosenDate();
-  const byPub={};
-  const gamesOf=(site,date)=>{ const day=date&&D.presence[site]&&D.presence[site][date]; if(!day) return {}; return day; };
-  for(const site of D.sites){
-    const now=gamesOf(site,D.latest[site]); const base=baselineDate(site,chosen); const before=base?gamesOf(site,base):null;
-    for(const [gk,row] of Object.entries(now)){ const g=D.games[gk]; if(!g||!g.publisher) continue; const p=byPub[g.publisher] ||= {pub:g.publisher,sites:{},titles:new Set(),total:0,best:null};
-      const ps=p.sites[site] ||= {n:0,sum:0,dn:null}; ps.n++; ps.sum+=row[0]; p.titles.add(gk); p.total+=row[0]; if(!p.best||row[0]>p.best.usd) p.best={name:g.name,usd:row[0],site}; }
-    if(before){ const cnt={}; for(const gk of Object.keys(before)){ const g=D.games[gk]; if(g&&g.publisher) cnt[g.publisher]=(cnt[g.publisher]||0)+1; }
-      for(const p of Object.values(byPub)){ const ps=p.sites[site]; const b=cnt[p.pub]||0; if(ps) ps.dn=ps.n-b; else if(b) (p.sites[site]={n:0,sum:0,dn:-b}); }
-      for(const [pub,b] of Object.entries(cnt)) if(!byPub[pub]) byPub[pub]={pub,sites:{[site]:{n:0,sum:0,dn:-b}},titles:new Set(),total:0,best:null}; }
-  }
-  return byPub;
-}
-function pubTable(forEmail=false){
-  const stats=pubStats(); const order=new Map(D.publishers.map((p,i)=>[p.publisher,i])); const focus=new Set(D.publishers.filter(p=>p.focus).map(p=>p.publisher));
-  const rows=Object.values(stats).filter(p=>p.titles.size||Object.values(p.sites).some(s=>s.dn));
-  const f=rows.filter(p=>focus.has(p.pub)).sort((a,b)=>order.get(a.pub)-order.get(b.pub));
-  const o=rows.filter(p=>!focus.has(p.pub)).sort((a,b)=>(b.titles.size-a.titles.size)||(b.total-a.total)||a.pub.localeCompare(b.pub));
-  const cell=ps=>{ if(!ps||(!ps.n&&!ps.dn)) return `<td style="text-align:center;color:#999">—</td>`; let h=`<b>${ps.n}</b> ${ps.n===1?'title':'titles'}<br><span style="color:#555">${fmt(ps.sum)}</span>`; if(ps.dn) h+=`<br><span style="color:${ps.dn>0?C().up:C().down};font-size:12px">${ps.dn>0?'▲':'▼'} ${Math.abs(ps.dn)} since last check</span>`; return `<td style="text-align:center">${h}</td>`; };
-  const row=p=>`<tr><td><b>${esc(pubName(p.pub))}</b></td><td class="num" style="text-align:right">${p.titles.size}</td>${D.sites.map(s=>cell(p.sites[s])).join('')}<td class="num" style="text-align:right">${fmt(p.total)}</td><td>${p.best?`${esc(p.best.name)} <span style="color:#777">(${fmt(p.best.usd)} · ${D.site_label[p.best.site]})</span>`:'—'}</td></tr>`;
-  const head=`<thead><tr><th>Publisher</th><th style="text-align:right">Titles</th>${D.sites.map(s=>`<th style="text-align:center">${D.site_label[s]}</th>`).join('')}<th style="text-align:right">Total reward</th><th>Highest-paying title</th></tr></thead>`;
-  const sep=o.length?`<tr class="sep"><td colspan="${5+D.sites.length}"${forEmail?' style="background:#e9edf2;font-style:italic;font-weight:600"':''}>Other publishers on these walls</td></tr>`:'';
-  return head+'<tbody>'+f.map(row).join('')+sep+o.map(row).join('')+'</tbody>';
-}
 function renderPub(){ put('#pubTbl','innerHTML',pubTable(false));
   const today=new Set(); let attributed=0; for(const s of D.sites) for(const gk of Object.keys(D.presence[s][D.latest[s]]||{})) today.add(gk); for(const gk of today) if(D.games[gk]?.publisher) attributed++;
   put('#pubCaveat','textContent',`Publisher attribution covers ${attributed} of the ${today.size} games listed today; the rest are not represented here.`); }
@@ -207,36 +138,6 @@ function renderKpis(){
 }
 
 // ---------- email (spec §5)
-const ADDED=`<span style="color:${'#137333'};font-weight:600">added</span>`, REMOVED=`<span style="color:${'#c5221f'};font-weight:600">removed</span>`;
-// email only: a reward move counts when it exceeds REWARD_MOVE_PCT of the previous price (milestone-count changes always count)
-const bigMove=c=>c.dReward!=null && c.before && c.before[0]>0 && Math.abs(c.dReward)/c.before[0] > (D.reward_move_pct??0.10);
-function findings(){
-  const out=[]; const focusPubs=D.publishers.filter(p=>p.focus).map(p=>p.publisher);
-  const rows=[...D.block1,...D.block2.map(b=>({...b,block2:true}))];
-  for(const pub of focusPubs){ const items=[]; const pn=esc(pubName(pub));
-    for(const r of rows){ if((r.publisher||'')!==pub) continue; const cells=D.sites.map(s=>({s,c:cellOf(s,r.keys)}));
-      const added=cells.filter(x=>x.c.st==='Added').map(x=>D.site_label[x.s]); const listed=cells.some(x=>x.c.now);
-      if(added.length) items.push({o:0,t:`${esc(r.game)} (${pn}) — newly ${ADDED} on ${added.join(', ')}`});
-      else if(r.block2&&listed) items.push({o:1,t:`${esc(r.game)} (${pn})`});
-      for(const x of cells) if(x.c.st==='Remains'&&(bigMove(x.c)||x.c.dTasks!=null)){ const parts=[]; if(bigMove(x.c)) parts.push(`reward ${fmt(x.c.before[0])} → ${fmt(x.c.now[0])} (${x.c.dReward>0?'+':'−'}${Math.round(Math.abs(x.c.dReward)/x.c.before[0]*100)}%)`); if(x.c.dTasks!=null) parts.push(`milestones ${x.c.before[1]} → ${x.c.now[1]}`); items.push({o:2,t:`${esc(r.game)} (${pn}) on ${D.site_label[x.s]} — ${parts.join(', ')}`}); } }
-    items.sort((a,b)=>a.o-b.o); out.push(...items.map(i=>i.t)); }
-  return out;
-}
-function buildEmail(){
-  const {date:chosen}=chosenDate(); const F='font-family:Calibri,Arial,sans-serif;font-size:14px;color:#1f1f1f';
-  const own=Object.entries(D.games).filter(([gk,g])=>g.playtika).map(([gk,g])=>{ const walls=D.sites.filter(s=>pres(s,D.latest[s],[gk])).map(s=>D.site_label[s]); return walls.length?`${g.name} (${walls.join(', ')})`:null; }).filter(Boolean);
-  const changes=[]; for(const r of [...D.block1,...D.block2]){ const a=[],rm=[]; for(const s of D.sites){ const st=cellOf(s,r.keys).st; if(st==='Added') a.push(D.site_label[s]); if(st==='Removed') rm.push(D.site_label[s]); } if(a.length||rm.length) changes.push(`${esc(r.game)} — ${[a.length?`${ADDED} on ${a.join(', ')}`:'',rm.length?`${REMOVED} from ${rm.join(', ')}`:''].filter(Boolean).join('; ')}`); }
-  const nf=findings();
-  const tbl=t=>t.replace(/<table/g,'<table style="border-collapse:collapse;font-size:13px"').replace(/<th/g,'<th style="border:1px solid #cfcfcf;padding:5px 8px;background:#f0f3f6;text-align:left"').replace(/<td(?![^>]*style=)/g,'<td style="border:1px solid #cfcfcf;padding:5px 8px"').replace(/<td style="/g,'<td style="border:1px solid #cfcfcf;padding:5px 8px;');
-  const legend=`<div style="${F};font-size:12px;margin:6px 0">${Object.entries(C()).filter(([k])=>!['up','down'].includes(k)).map(([k,[bg]])=>`<span style="display:inline-block;width:12px;height:12px;background:${bg};border:1px solid #bbb;vertical-align:-2px;margin-right:4px"></span>${k}&nbsp;&nbsp;`).join('')} ▲ / ▼ change vs last check</div>`;
-  const ul=a=>a.length?`<ul style="margin:4px 0 10px 20px;padding:0">${a.map(x=>`<li style="margin:2px 0">${x}</li>`).join('')}</ul>`:`<div style="margin:4px 0 10px 20px;color:#666">none</div>`;   // items are pre-escaped html
-  const body=`<div style="${F}"><p>Hello everyone,</p><p>Please find below the latest check regarding Playtika competitors in the offerwalls ${D.sites.map(s=>D.site_label[s]).join(', ')}. This check covers what changed since ${chosen}.</p>
-<p><b>Notable Findings:</b></p>${ul(nf)}<p>Our own titles currently listed: ${own.length?esc(own.join('; ')):'none'}</p><p>Changes since ${chosen}:</p>${ul(changes)}
-<p><b>Direct Top Competitors Status:</b></p>${legend}<table>${focusTable(true)}</table>
-<p style="margin-top:14px"><b>Where Each Competitor Stands:</b></p><table>${pubTable(true)}</table><p>Thanks,</p></div>`;
-  return {subject:`Competitors Status in Popular Offerwalls (${longDate(D.check_date)})`, html:tbl(body)};
-}
-function emailText(html){ const d=document.createElement('div'); d.innerHTML=html; d.querySelectorAll('tr').forEach(tr=>tr.append('\n')); d.querySelectorAll('td,th').forEach(c=>c.append('\t')); d.querySelectorAll('p,li,div').forEach(p=>p.append('\n')); return d.textContent.replace(/\n{3,}/g,'\n\n'); }
 async function copyHtml(el,html){
   try{ if(navigator.clipboard&&window.ClipboardItem&&window.isSecureContext){ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([emailText(html)],{type:'text/plain'})})]); return true; } }catch(e){}
   try{ const r=document.createRange(); r.selectNodeContents(el); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); const ok=document.execCommand('copy'); sel.removeAllRanges(); return ok; }catch(e){ return false; }
