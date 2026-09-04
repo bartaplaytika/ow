@@ -3,298 +3,259 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Offerwall Catalogs</title>
+<title>Offerwall competitive status</title>
 <style>
-:root{color-scheme:light;--bg:#fcfcfb;--surface:#ffffff;--line:#e6e5e1;--grid:#efeeea;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8984;
- --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--good:#008300;--bad:#e34948;--warn:#b86e00;--accent:#2a78d6;--chip:#f0efec;--hi:#fff7e6;--hiLine:#f0d9a8}
-@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#151514;--surface:#1f1f1d;--line:#33332f;--grid:#2a2a27;--ink:#fff;--ink2:#c3c2b7;--ink3:#8f8e87;
- --s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#3fb950;--bad:#e66767;--warn:#e0a24a;--accent:#3987e5;--chip:#2a2a27;--hi:#2b2718;--hiLine:#5a4a22}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-header{padding:18px 24px 10px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
-h1{font-size:18px;margin:0 8px 0 0}header .sub{color:var(--ink2);font-size:13px}
-.spacer{flex:1}
-main{padding:0 24px 40px;max-width:1320px;margin:0 auto}
-section{margin-top:24px}h2{font-size:15px;margin:0 0 10px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.tile .lab{color:var(--ink2);font-size:13px}.tile .val{font-size:26px;font-weight:600;margin-top:2px}.tile .meta{color:var(--ink3);font-size:12px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
-.card h3{font-size:13px;margin:0 0 6px;font-weight:600}.card .hint{color:var(--ink3);font-size:12px;margin-bottom:6px}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
-svg{width:100%;height:auto;display:block;overflow:visible}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:6px}.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
-.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 9px;border-radius:6px;font-size:12px;display:none;z-index:10;white-space:nowrap}
-.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-select,input[type=search]{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-input[type=search]{min-width:220px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.seg button{font:inherit;padding:6px 12px;border:0;background:var(--surface);color:var(--ink2);cursor:pointer}.seg button.on{background:var(--accent);color:#fff}
-label.tg{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);cursor:pointer}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--ink2);font-weight:600;position:sticky;top:0;background:var(--surface);white-space:nowrap}
-th.sort{cursor:pointer}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.tbl{max-height:600px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-tr.game{cursor:pointer}tr.game:hover td{background:var(--chip)}tr.ms td{background:var(--chip);padding:0 8px 10px}
-.mstab{width:100%;font-size:12px}.mstab td,.mstab th{padding:4px 6px;border-bottom:1px solid var(--line);background:transparent;position:static}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
-.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
-.b-added{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)}.b-removed{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
-.b-reward{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}.b-milestones{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
-.co{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;background:var(--chip);color:var(--ink2);margin-left:6px;white-space:nowrap}
-.co.p1{background:var(--hi);color:var(--warn);border:1px solid var(--hiLine)}
-.up{color:var(--good)}.down{color:var(--bad)}.ok{color:var(--good)}.fail{color:var(--bad)}.muted{color:var(--ink3)}.small{font-size:12px}
-.day{padding:8px 8px 4px;color:var(--ink2);font-weight:600;font-size:12px;background:var(--bg);position:sticky;top:31px}
-.pres{display:inline-flex;flex-direction:column;gap:2px;min-width:120px}.pres .absent{color:var(--ink3)}
-.wl-row td{background:transparent}.wl-row.p1 td{background:color-mix(in srgb,var(--hi) 55%,transparent)}.wl-row.absent td b{color:var(--ink2);font-weight:500}
-.empty{color:var(--ink3);padding:20px;text-align:center}
-.more{display:block;width:100%;padding:10px;background:var(--chip);border:0;color:var(--ink2);font:inherit;cursor:pointer}
-.chg{display:inline-flex;gap:8px;flex-wrap:wrap}
-@media (max-width:640px){header,main{padding-left:14px;padding-right:14px}.grid2{grid-template-columns:1fr}}
+:root{--bg:#f6f7f9;--surface:#fff;--line:#dfe3e8;--ink:#1f1f1f;--ink2:#555;--ink3:#888;--brand:#1f4e79;--chip:#eef2f6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Calibri,"Segoe UI",Arial,sans-serif}
+header{background:var(--brand);color:#fff;padding:12px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:600}header a{color:#cfe0f3;font-size:13px;text-decoration:none}header .spacer{flex:1}
+.toolbar{background:var(--surface);border-bottom:1px solid var(--line);padding:10px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}.tabs button{font:inherit;padding:6px 12px;border:0;background:var(--surface);color:var(--ink2);cursor:pointer}.tabs button.on{background:var(--brand);color:#fff}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;background:var(--chip);font-size:12px;color:var(--ink2)}
+select,input[type=search]{font:inherit;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}input[type=search]{min-width:230px}
+.btn{font:inherit;padding:6px 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--ink)}.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+#baselineNote{font-size:12px;color:var(--ink2)}
+main{padding:14px 22px 40px;max-width:1400px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.kpi .l{font-size:12px;color:var(--ink2)}.kpi .v{font-size:24px;font-weight:600;margin:2px 0}.kpi .d{font-size:12px;color:var(--ink3)}
+.panel{display:none}.panel.on{display:block}h2{font-size:16px;margin:8px 0 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:6px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#f0f3f6;color:var(--ink2);font-weight:600;white-space:nowrap}td.num,th.num{text-align:right;white-space:nowrap}
+td.st{text-align:center;white-space:nowrap;cursor:pointer;min-width:120px}td.st .mv{font-size:12px;display:block;margin-top:2px}
+tr.sep td{background:#e9edf2;color:var(--ink2);font-weight:600;font-style:italic}
+td.genre{background:#fafbfc;color:var(--ink2);white-space:nowrap}
+.gname{cursor:pointer;font-weight:600}.gname:hover{text-decoration:underline}.loose{color:var(--ink3);font-size:11px;cursor:help}
+.pill{display:inline-block;font-size:10px;padding:0 6px;border-radius:999px;margin-left:5px;vertical-align:middle}.pill.pt{background:#dbe8f7;color:#1f4e79}.pill.fc{background:#e8e8e8;color:#555}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin:0 0 8px}.legend i{display:inline-block;width:14px;height:12px;border:1px solid #ccc;vertical-align:-2px;margin-right:4px}
+.sub{font-size:12px;color:var(--ink3)}.caveat{font-size:12px;color:var(--ink2);font-style:italic;margin-top:8px}
+.hcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px;overflow-x:auto}.hcard h3{margin:0 0 6px;font-size:14px}
+.hist td,.hist th{text-align:center;font-size:12px;padding:3px 6px}.hist td.nc{background:#f3f3f3;color:#bbb}.hist td.nf{color:#999}
+dialog{border:1px solid var(--line);border-radius:10px;padding:0;max-width:min(1100px,95vw);width:auto}dialog::backdrop{background:rgba(0,0,0,.35)}
+.dhead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}.dhead h3{margin:0;font-size:15px;flex:1}.dbody{padding:12px 16px;max-height:75vh;overflow:auto}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px}.tag.spend{background:#fbd5d5;color:#8a1c1c}.tag.play{background:#dff1e2;color:#1e5b2a}.tag.unpaid{background:#eee;color:#666}
+tr.spend td{background:#fdf3f2}.bar{display:inline-block;height:6px;background:#9fc3e6;vertical-align:middle;margin-right:5px;border-radius:2px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f1f1f;color:#fff;padding:8px 14px;border-radius:6px;font-size:13px;display:none;z-index:20}
+.best{background:#d9ead3}
+@media print{header,.toolbar,.kpis{display:none}.panel{display:block!important}main{padding:0}}
 </style>
 </head>
 <body>
-<header>
-  <h1>Offerwall Catalogs</h1><span class="sub" id="sub">loading…</span>
-  <span class="spacer"></span>
-  <div class="controls">
-    <div class="seg" id="rangeSeg"><button data-d="7" class="on">7 days</button><button data-d="14">14 days</button><button data-d="30">30 days</button><button data-d="0">All</button></div>
-    <div class="seg" id="platSeg"><button data-p="" class="on">All platforms</button><button data-p="kashkick">KashKick</button><button data-p="freecash">Freecash</button><button data-p="testerup">TesterUp</button></div>
-    <label class="tg"><input type="checkbox" id="wlOnly"> Watchlist only</label>
-  </div>
-</header>
+<header><h1>Offerwall Tracker</h1><span class="chip" id="checkChip"></span><span class="spacer"></span><a href="overview.html">Trends &amp; change log ›</a></header>
+<div class="toolbar">
+  <div class="tabs" id="tabs"><button data-t="focus" class="on">Focus matrix</button><button data-t="pub">By publisher</button><button data-t="cat">Full catalog</button><button data-t="hist">History search</button></div>
+  <label>Change over <select id="win"><option value="1">Last 24 hours</option><option value="7">Last week</option><option value="30">Last month</option><option value="365">Last year</option></select></label>
+  <span id="baselineNote"></span>
+  <input type="search" id="q" placeholder="Filter by game or publisher">
+  <select id="fs"><option value="">Any status</option><option>Added</option><option>Remains</option><option>Removed</option><option>Not Found</option></select>
+  <select id="fw"><option value="">Any wall</option></select>
+  <button class="btn primary" id="btnEmail">Generate email</button>
+</div>
 <main>
-<section>
-  <div class="tiles" id="tiles"></div>
-</section>
-<section>
-  <h2>Watchlist <span class="muted small" id="wlNote"></span></h2>
-  <div class="tbl" style="max-height:none"><table id="wl"><thead><tr>
-    <th>Game</th><th>Genre</th><th>KashKick</th><th>Freecash</th><th>TesterUp</th><th>Changes in range</th><th>Last event</th>
-  </tr></thead><tbody></tbody></table></div>
-</section>
-<section>
-  <h2>Change log <span class="muted small" id="evNote"></span></h2>
-  <div class="controls" style="margin-bottom:10px">
-    <div class="seg" id="typeSeg"><button data-t="" class="on">All</button><button data-t="added">Entered</button><button data-t="removed">Left</button><button data-t="reward">Reward changed</button><button data-t="milestones">Milestones changed</button></div>
-    <input type="search" id="evq" placeholder="Filter by game…">
-  </div>
-  <div class="tbl" id="evWrap"><table id="ev"><thead><tr><th>When</th><th>Platform</th><th>Event</th><th>Game</th><th>Device</th><th>Details</th></tr></thead><tbody></tbody></table></div>
-</section>
-<section>
-  <h2>History</h2>
-  <div class="grid2">
-    <div class="card"><h3>Games per run</h3><div class="hint">Distinct offers per harvest. Hollow marks = suspect (partial) harvests, excluded from the change log.</div><div id="chartGames"></div><div class="legend" id="legend1"></div></div>
-    <div class="card"><h3>Total advertised reward (USD)</h3><div class="hint">Sum of every offer's headline reward</div><div id="chartUsd"></div><div class="legend" id="legend2"></div></div>
-  </div>
-</section>
-<section>
-  <h2>Catalog browser</h2>
-  <div class="controls" style="margin-bottom:10px">
-    <div class="seg" id="bPlatSeg"></div>
-    <select id="runSel"></select>
-    <input type="search" id="q" placeholder="Search game, company, category, milestone…">
-    <select id="typeSel"><option value="">All milestone types</option></select>
-    <span class="muted small" id="count"></span>
-  </div>
-  <div class="tbl"><table id="games"><thead><tr>
-    <th class="sort" data-k="name">Game / Offer</th><th class="sort" data-k="company">Company</th><th class="sort" data-k="cat">Category</th><th class="sort" data-k="plat">Device</th>
-    <th class="num sort" data-k="usd">Reward USD</th><th class="num sort" data-k="n">Milestones</th><th class="num sort" data-k="maxdays">Longest limit (d)</th>
-  </tr></thead><tbody></tbody></table></div>
-</section>
-<section>
-  <h2>Runs</h2>
-  <div class="tbl"><table id="runs"><thead><tr><th>Captured (local time)</th><th>Platform</th><th class="num">Games</th><th class="num">Milestones</th><th class="num">Total USD</th><th>Integrity</th><th>Files</th></tr></thead><tbody></tbody></table></div>
-</section>
+  <div class="kpis" id="kpis"></div>
+  <div class="panel on" id="p-focus"><h2>Direct top competitors</h2><div class="card"><div class="legend" id="legend"></div><table id="focusTbl"></table></div></div>
+  <div class="panel" id="p-pub"><h2>Where each publisher stands</h2><div class="card"><table id="pubTbl"></table><div class="caveat" id="pubCaveat"></div></div></div>
+  <div class="panel" id="p-cat"><h2>Every game listed today</h2><div class="card"><table id="catTbl"></table></div></div>
+  <div class="panel" id="p-hist"><h2>History search</h2><div style="margin-bottom:10px"><input type="search" id="hq" placeholder="Game or publisher (2+ characters)"></div><div id="histOut"></div></div>
 </main>
-<div class="tip" id="tip"></div>
+<dialog id="panel"><div class="dhead"><h3 id="panelTitle"></h3><button class="btn" onclick="document.getElementById('panel').close()">Close</button></div><div class="dbody" id="panelBody"></div></dialog>
+<dialog id="dlg"><div class="dhead"><h3>Email preview</h3><button class="btn" id="copySubj">Copy subject</button><button class="btn primary" id="copyBody">Copy email body</button><button class="btn" onclick="document.getElementById('dlg').close()">Close</button></div><div class="dbody"><div class="sub" id="subjLine" style="margin-bottom:8px"></div><div id="emailBody"></div></div></dialog>
+<div class="toast" id="toast"></div>
 <script>
-const PL = {kashkick:{label:'KashKick',color:'var(--s1)'},freecash:{label:'Freecash',color:'var(--s2)'},testerup:{label:'TesterUp',color:'var(--s3)'}};
-const ORDER = ['kashkick','freecash','testerup'];
-const TYPE = {added:'Entered',removed:'Left',reward:'Reward',milestones:'Milestones'};
-const fmt = n => n==null?'':Number(n).toLocaleString('en-US',{maximumFractionDigits:0});
-const fmt2 = n => n==null?'':Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const tsDate = ts => { const m = ts.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/); return new Date(Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5])); };
-const fmtDate = d => d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-const fmtDay = d => d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
-const norm = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
-let runs=[], byPlat={}, events=[], watch=[], cache={}, latest={};
-let range=7, platF='', wlOnly=false, typeF='', evLimit=150;
+'use strict';
+let D=null; const S={win:'1',q:'',fs:'',fw:''};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=v=>{ v=+v||0; const s=Math.abs(v-Math.round(v))<0.005 ? Math.round(v).toLocaleString('en-US') : v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); return '$'+s; };
+const longDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+const put=(sel,prop,val)=>{ const n=document.querySelector(sel); if(n) n[prop]=val; };
+function audit(ids){ const missing=ids.filter(i=>!document.getElementById(i)); if(missing.length) throw new Error('audit: missing ids '+missing.join(', ')); }
+const toast=m=>{ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); };
 
-async function jsonl(u){ const r=await fetch(u+'?_='+Date.now()); if(!r.ok) return []; return (await r.text()).split('\n').filter(Boolean).map(l=>JSON.parse(l)); }
-async function loadData(rel){ if(!cache[rel]){ const r=await fetch('data/'+rel); cache[rel]=await r.json(); } return cache[rel]; }
-
-// ---- watchlist matching
-let TIERS = {};
-function matchCompany(name){
-  const n = norm(name);
-  for(const w of watch) if(w.keys.some(k=>k.length>=4 && n.includes(k))) return w;   // watch is sorted longest-key-first
-  return null;
+// ---------- time (spec §3.4): the browser resolves time
+function statusOf(now,before,hasPrev){ if(!hasPrev) return now?'Added':'Not Found'; if(now) return before?'Remains':'Added'; return before?'Removed':'Not Found'; }
+function earliestDate(){ return D.sites.map(s=>D.dates[s][0]).filter(Boolean).sort()[0]; }
+function chosenDate(){ const d=new Date(D.check_date+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()-(+S.win)); let iso=d.toISOString().slice(0,10); const e=earliestDate(); return {date: iso<e?e:iso, clamped: iso<e}; }
+function baselineDate(site,chosen){ const ds=D.dates[site]||[]; const latest=ds[ds.length-1]; let b=null; for(const d of ds){ if(d<=chosen && d<latest) b=d; } return b; }
+function pres(site,date,keys){ const day=date&&D.presence[site]&&D.presence[site][date]; if(!day) return null; let best=null; for(const k of keys){ const r=day[k]; if(r && (!best || r[0]>best[0])) best=r; } return best; }
+function cellOf(site,keys){
+  const latest=D.latest[site]; const {date:chosen}=chosenDate(); const base=baselineDate(site,chosen);
+  const now=pres(site,latest,keys), before=base?pres(site,base,keys):null;
+  const st=statusOf(!!now,!!before,!!base);
+  const c={st,now,before,base,dReward:null,dTasks:null};
+  if(now&&before){ if(Math.abs(now[0]-before[0])>=0.01) c.dReward=now[0]-before[0]; if(now[1]!==before[1]) c.dTasks=now[1]-before[1]; }
+  return c;
 }
-function tagCo(name){ const w=matchCompany(name); return w?`<span class="co ${w.priority===1?'p1':''}" title="${esc(w.genre)} · ${esc(TIERS[w.list]||w.list)}">${esc(w.company)}</span>`:''; }
-
-// ---- filters
-const since = () => range ? new Date(Date.now()-range*864e5) : new Date(0);
-function evFiltered(){
-  const s=since();
-  return events.filter(e => e.date>=s && (!platF||e.platform===platF) && (!typeF||e.type===typeF) && (!wlOnly||matchCompany(e.game)));
+const C=()=>D.colors;
+function cellHtml(site,keys,clickable=true){
+  const c=cellOf(site,keys), [bg,fg]=C()[c.st];
+  let inner='&nbsp;';
+  if(c.now){ inner=`<b>${fmt(c.now[0])}</b> ${c.now[1]?`(${c.now[1]} milestones)`:'<span style="color:#888">(milestones not captured)</span>'}`;
+    const mv=[]; if(c.dReward!=null) mv.push(`<span style="color:${c.dReward>0?C().up:C().down}">${c.dReward>0?'▲':'▼'} ${fmt(Math.abs(c.dReward))}</span>`);
+    if(c.dTasks!=null) mv.push(`<span style="color:${c.dTasks>0?C().up:C().down}">${c.dTasks>0?'▲':'▼'} ${Math.abs(c.dTasks)} milestones</span>`);
+    if(mv.length) inner+=`<span class="mv">${mv.join(' · ')}</span>`; }
+  return `<td class="st" style="background:${bg};color:${fg};text-align:center" data-st="${c.st}" ${clickable?`data-wall="${site}" data-keys="${esc(keys.join('||'))}"`:''}>${inner}</td>`;
 }
+function legendHtml(){ return Object.entries(C()).filter(([k])=>!['up','down'].includes(k)).map(([k,[bg]])=>`<span><i style="background:${bg}"></i>${k}</span>`).join('') + `<span style="margin-left:6px">▲ / ▼ change vs last check</span>`; }
 
-function tiles(){
-  const s=since(), evs=events.filter(e=>e.date>=s && (!platF||e.platform===platF) && (!wlOnly||matchCompany(e.game)));
-  const c = t => evs.filter(e=>e.type===t).length;
-  const wlc = evs.filter(e=>matchCompany(e.game)).length;
-  const lastRun = runs[runs.length-1];
-  const plats = ORDER.filter(p=>byPlat[p] && (!platF||p===platF));
-  const gamesNow = plats.reduce((s,p)=>s+byPlat[p][byPlat[p].length-1].games,0);
-  document.getElementById('tiles').innerHTML = `
-    <div class="tile"><div class="lab">Games in catalog now</div><div class="val">${fmt(gamesNow)}</div><div class="meta">${plats.map(p=>PL[p].label+' '+byPlat[p][byPlat[p].length-1].games).join(' · ')}</div></div>
-    <div class="tile"><div class="lab">Entered</div><div class="val up">+${c('added')}</div><div class="meta">${range?`last ${range} days`:'all time'}</div></div>
-    <div class="tile"><div class="lab">Left</div><div class="val down">−${c('removed')}</div><div class="meta">${range?`last ${range} days`:'all time'}</div></div>
-    <div class="tile"><div class="lab">Reward changes</div><div class="val">${c('reward')}</div><div class="meta">headline reward moved</div></div>
-    <div class="tile"><div class="lab">Milestone changes</div><div class="val">${c('milestones')}</div><div class="meta">count of steps changed</div></div>
-    <div class="tile"><div class="lab">Watchlist events</div><div class="val">${wlc}</div><div class="meta">${watch.length} games tracked</div></div>`;
-  document.getElementById('sub').textContent = lastRun ? `${runs.length} runs · last harvest ${fmtDate(lastRun.date)}` : 'no runs yet';
+// ---------- focus matrix (spec §4.3)
+function rowMatches(row){
+  const txt=(row.genre+' '+row.game+' '+row.publisher).toLowerCase();
+  if(S.q && !txt.includes(S.q.toLowerCase())) return false;
+  if(S.fs || S.fw){ const walls=S.fw?[S.fw]:D.sites; const sts=walls.map(w=>cellOf(w,row.keys).st); if(S.fs && !sts.includes(S.fs)) return false; if(!S.fs && S.fw && !['Added','Remains','Removed'].includes(sts[0])) return false; }
+  return true;
 }
+function matrixRows(rows, forEmail){
+  let html='', i=0;
+  while(i<rows.length){ let j=i; while(j<rows.length && rows[j].genre===rows[i].genre) j++;
+    for(let k=i;k<j;k++){ const r=rows[k];
+      const name=forEmail?esc(r.game):`<span class="gname" data-keys="${esc(r.keys.join('||'))}">${esc(r.game)}</span>${r.loose?` <span class="loose" title="Matched as ${esc(D.games[r.keys[0]]?.name||'')}">≈</span>`:''}`;
+      html+=`<tr>${k===i?`<td class="genre" rowspan="${j-i}"${forEmail?' style="background:#fafbfc;color:#555;vertical-align:top"':''}>${esc(r.genre)}</td>`:''}<td>${name}</td><td>${esc(r.publisher)||'<span style="color:#999">unattributed</span>'}</td>${D.sites.map(s=>cellHtml(s,r.keys,!forEmail)).join('')}</tr>`; }
+    i=j; }
+  return html;
+}
+function focusTable(forEmail=false){
+  const b1=D.block1.filter(rowMatches), b2=D.block2.filter(rowMatches);
+  const head=`<thead><tr><th>Genre</th><th>Game</th><th>Publisher</th>${D.sites.map(s=>`<th style="text-align:center">${D.site_label[s]}</th>`).join('')}</tr></thead>`;
+  const sep=b2.length?`<tr class="sep"><td colspan="${3+D.sites.length}"${forEmail?' style="background:#e9edf2;font-style:italic;font-weight:600"':''}>Other titles from publishers we track</td></tr>`:'';
+  return head+'<tbody>'+matrixRows(b1,forEmail)+sep+matrixRows(b2,forEmail)+'</tbody>';
+}
+function renderFocus(){ put('#legend','innerHTML',legendHtml()); put('#focusTbl','innerHTML',focusTable(false)); }
 
-// ---- watchlist table: one row per watched game that exists (now or in range) on any platform
-function watchTable(){
-  const s=since();
-  // one row per watchlist entry (canonical name), always shown — even when absent everywhere
-  const rowsByKey = new Map(watch.map(w=>[w.name,{w,name:w.name,pres:{},ev:[]}]));
-  for(const p of ORDER){ const L=latest[p]; if(!L) continue;
-    for(const g of L.games){ const w=matchCompany(g.name); if(!w) continue; (rowsByKey.get(w.name).pres[p] ||= []).push(g); } }
-  for(const e of events){ if(e.date<s) continue; const w=matchCompany(e.game); if(!w) continue; if(platF&&e.platform!==platF) continue; rowsByKey.get(w.name).ev.push(e); }
-  let rows=[...rowsByKey.values()];
-  if(platF) rows = rows.filter(r=>r.pres[platF]||r.ev.length);
-  rows.sort((a,b)=> (a.w.priority-b.w.priority) || a.w.genre.localeCompare(b.w.genre) || a.name.localeCompare(b.name));
-  const cell = (r,p) => { const gs=r.pres[p]; if(!gs) return `<span class="pres"><span class="absent">—</span></span>`;
-    return `<span class="pres">${gs.map(g=>`<span title="${esc(g.plat)}">$${fmt(g.usd)} <span class="muted">· ${g.ms.length} steps · ${esc(g.plat)}</span></span>`).join('')}</span>`; };
-  const chg = r => { const c={}; r.ev.forEach(e=>c[e.type]=(c[e.type]||0)+1); const parts=Object.entries(c).map(([t,n])=>`<span class="badge b-${t}">${TYPE[t]} ${n}</span>`); return parts.length?`<span class="chg">${parts.join('')}</span>`:'<span class="muted">no changes</span>'; };
-  const last = r => { if(!r.ev.length) return ''; const e=r.ev.reduce((a,b)=>a.date>b.date?a:b); return `<span class="small">${fmtDate(e.date)} · ${PL[e.platform].label} · ${evDetail(e)}</span>`; };
-  const tb=document.querySelector('#wl tbody');
-  let html='', lastTier=null;
-  for(const r of rows){
-    if(r.w.list!==lastTier){ lastTier=r.w.list; html+=`<tr><td colspan="7" class="day">${esc(TIERS[lastTier]||lastTier)}</td></tr>`; }
-    const anywhere = ORDER.some(p=>r.pres[p]);
-    html+=`<tr class="wl-row ${r.w.priority===1?'p1':''} ${anywhere?'':'absent'}"><td><b>${esc(r.name)}</b><div class="small muted">${esc(r.w.company)}</div></td><td class="small muted">${esc(r.w.genre)}</td><td>${cell(r,'kashkick')}</td><td>${cell(r,'freecash')}</td><td>${cell(r,'testerup')}</td><td>${chg(r)}</td><td>${last(r)}</td></tr>`;
+// ---------- publishers (spec §4.4)
+function pubStats(){
+  const {date:chosen}=chosenDate();
+  const byPub={};
+  const gamesOf=(site,date)=>{ const day=date&&D.presence[site]&&D.presence[site][date]; if(!day) return {}; return day; };
+  for(const site of D.sites){
+    const now=gamesOf(site,D.latest[site]); const base=baselineDate(site,chosen); const before=base?gamesOf(site,base):null;
+    for(const [gk,row] of Object.entries(now)){ const g=D.games[gk]; if(!g||!g.publisher) continue; const p=byPub[g.publisher] ||= {pub:g.publisher,sites:{},titles:new Set(),total:0,best:null};
+      const ps=p.sites[site] ||= {n:0,sum:0,dn:null}; ps.n++; ps.sum+=row[0]; p.titles.add(gk); p.total+=row[0]; if(!p.best||row[0]>p.best.usd) p.best={name:g.name,usd:row[0],site}; }
+    if(before){ const cnt={}; for(const gk of Object.keys(before)){ const g=D.games[gk]; if(g&&g.publisher) cnt[g.publisher]=(cnt[g.publisher]||0)+1; }
+      for(const p of Object.values(byPub)){ const ps=p.sites[site]; const b=cnt[p.pub]||0; if(ps) ps.dn=ps.n-b; else if(b) (p.sites[site]={n:0,sum:0,dn:-b}); }
+      for(const [pub,b] of Object.entries(cnt)) if(!byPub[pub]) byPub[pub]={pub,sites:{[site]:{n:0,sum:0,dn:-b}},titles:new Set(),total:0,best:null}; }
   }
-  tb.innerHTML = html || `<tr><td colspan="7" class="empty">No watchlist games${platF?' on this platform':''}. Edit focus_games.csv and run build_watchlist.py.</td></tr>`;
-  const present = rows.filter(r=>ORDER.some(p=>r.pres[p])).length;
-  document.getElementById('wlNote').textContent = `— ${present} of ${rows.length} watched games are in a catalog now`;
+  return byPub;
+}
+function pubTable(forEmail=false){
+  const stats=pubStats(); const order=new Map(D.publishers.map((p,i)=>[p.publisher,i])); const focus=new Set(D.publishers.filter(p=>p.focus).map(p=>p.publisher));
+  const rows=Object.values(stats).filter(p=>p.titles.size||Object.values(p.sites).some(s=>s.dn));
+  const f=rows.filter(p=>focus.has(p.pub)).sort((a,b)=>order.get(a.pub)-order.get(b.pub));
+  const o=rows.filter(p=>!focus.has(p.pub)).sort((a,b)=>(b.titles.size-a.titles.size)||(b.total-a.total)||a.pub.localeCompare(b.pub));
+  const cell=ps=>{ if(!ps||(!ps.n&&!ps.dn)) return `<td style="text-align:center;color:#999">—</td>`; let h=`<b>${ps.n}</b> ${ps.n===1?'title':'titles'}<br><span style="color:#555">${fmt(ps.sum)}</span>`; if(ps.dn) h+=`<br><span style="color:${ps.dn>0?C().up:C().down};font-size:12px">${ps.dn>0?'▲':'▼'} ${Math.abs(ps.dn)} since last check</span>`; return `<td style="text-align:center">${h}</td>`; };
+  const row=p=>`<tr><td><b>${esc(p.pub)}</b></td><td class="num" style="text-align:right">${p.titles.size}</td>${D.sites.map(s=>cell(p.sites[s])).join('')}<td class="num" style="text-align:right">${fmt(p.total)}</td><td>${p.best?`${esc(p.best.name)} <span style="color:#777">(${fmt(p.best.usd)} · ${D.site_label[p.best.site]})</span>`:'—'}</td></tr>`;
+  const head=`<thead><tr><th>Publisher</th><th style="text-align:right">Titles</th>${D.sites.map(s=>`<th style="text-align:center">${D.site_label[s]}</th>`).join('')}<th style="text-align:right">Total reward</th><th>Highest-paying title</th></tr></thead>`;
+  const sep=o.length?`<tr class="sep"><td colspan="${5+D.sites.length}"${forEmail?' style="background:#e9edf2;font-style:italic;font-weight:600"':''}>Other publishers on these walls</td></tr>`:'';
+  return head+'<tbody>'+f.map(row).join('')+sep+o.map(row).join('')+'</tbody>';
+}
+function renderPub(){ put('#pubTbl','innerHTML',pubTable(false));
+  const today=new Set(); let attributed=0; for(const s of D.sites) for(const gk of Object.keys(D.presence[s][D.latest[s]]||{})) today.add(gk); for(const gk of today) if(D.games[gk]?.publisher) attributed++;
+  put('#pubCaveat','textContent',`Publisher attribution covers ${attributed} of the ${today.size} games listed today; the rest are not represented here.`); }
+
+// ---------- full catalog (spec §4.5)
+function renderCatalog(){
+  const focusKeys=new Set(D.block1.flatMap(b=>b.keys));
+  const rows=[]; const seen=new Set();
+  for(const s of D.sites) for(const [gk,r] of Object.entries(D.presence[s][D.latest[s]]||{})){ if(seen.has(gk)) continue; seen.add(gk);
+    const per={}; let best=0,walls=0; for(const s2 of D.sites){ const rr=D.presence[s2][D.latest[s2]]?.[gk]; if(rr){ per[s2]=rr; walls++; best=Math.max(best,rr[0]); } }
+    rows.push({gk,g:D.games[gk],per,best,walls}); }
+  rows.sort((a,b)=>b.best-a.best);
+  const cell=r=>{ if(!r) return `<td style="text-align:center;color:#bbb">—</td>`; const vs=r[2]; let sub=vs.length>1?`${vs.length} offers`+(Math.abs(vs[0][3]-vs[vs.length-1][3])>=0.01?` · ${fmt(vs[vs.length-1][3])}–${fmt(vs[0][3])}`:''):`${r[1]} milestones`; return `<td style="text-align:center"><b>${fmt(r[0])}</b><br><span class="sub">${sub}</span></td>`; };
+  const html=`<thead><tr><th>Game</th><th>Publisher</th><th>Category</th>${D.sites.map(s=>`<th style="text-align:center">${D.site_label[s]}</th>`).join('')}<th class="num">Best $</th><th class="num">Walls</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr><td><span class="gname" data-keys="${esc(r.gk)}">${esc(r.g.name)}</span>${r.g.playtika?'<span class="pill pt">Playtika</span>':''}${focusKeys.has(r.gk)?'<span class="pill fc">focus</span>':''}</td><td>${r.g.publisher?esc(r.g.publisher):'<span style="color:#999">unattributed</span>'}</td><td>${esc(r.g.genre)}</td>${D.sites.map(s=>cell(r.per[s])).join('')}<td class="num">${fmt(r.best)}</td><td class="num">${r.walls}</td></tr>`).join('')+'</tbody>';
+  put('#catTbl','innerHTML',html);
 }
 
-function evDetail(e){
-  if(e.type==='added') return `entered at $${fmt2(e.usd)} · ${e.milestones} milestones`;
-  if(e.type==='removed') return `left (was $${fmt2(e.usd)} · ${e.milestones} milestones)`;
-  if(e.type==='reward'){ const d=e.after-e.before; return `$${fmt2(e.before)} → $${fmt2(e.after)} <span class="${d>0?'up':'down'}">(${d>0?'+':''}${fmt2(d)})</span>`; }
-  if(e.type==='milestones'){ const d=e.after-e.before; return `${e.before} → ${e.after} milestones <span class="${d>0?'up':'down'}">(${d>0?'+':''}${d})</span>`; }
-  return '';
-}
-function eventTable(){
-  const q=norm(document.getElementById('evq').value);
-  let evs=evFiltered().filter(e=>!q||norm(e.game).includes(q));
-  evs.sort((a,b)=> (b.date-a.date) || ((matchCompany(b.game)?1:0)-(matchCompany(a.game)?1:0)));
-  // watchlist first within the same run
-  const groups=new Map(); evs.forEach(e=>{ const k=e.date.toDateString(); (groups.get(k)||groups.set(k,[]).get(k)).push(e); });
-  let html='', n=0, total=evs.length;
-  for(const [k,list] of groups){
-    if(n>=evLimit) break;
-    list.sort((a,b)=> ((matchCompany(b.game)?.priority?10-matchCompany(b.game).priority:0)-(matchCompany(a.game)?.priority?10-matchCompany(a.game).priority:0)) || (b.date-a.date));
-    html+=`<tr><td colspan="6" class="day">${fmtDay(list[0].date)} <span class="muted" style="font-weight:400">· ${list.length} events</span></td></tr>`;
-    for(const e of list){ if(n++>=evLimit) break;
-      html+=`<tr><td class="small muted" style="white-space:nowrap">${e.date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})}</td><td><span class="dot" style="background:${PL[e.platform].color}"></span>${PL[e.platform].label}</td><td><span class="badge b-${e.type}">${TYPE[e.type]}</span></td><td>${esc(e.game)}${tagCo(e.game)}</td><td class="small muted">${esc(e.plat)}</td><td>${evDetail(e)}</td></tr>`; }
-  }
-  document.querySelector('#ev tbody').innerHTML = html || `<tr><td colspan="6" class="empty">No events in this range.</td></tr>`;
-  const wrap=document.getElementById('evWrap'); wrap.querySelector('.more')?.remove();
-  if(total>evLimit){ const b=document.createElement('button'); b.className='more'; b.textContent=`Show more (${total-evLimit} remaining)`; b.onclick=()=>{evLimit+=300; eventTable();}; wrap.appendChild(b); }
-  document.getElementById('evNote').textContent = `— ${total} events ${range?`in the last ${range} days`:'all time'}${platF?' · '+PL[platF].label:''}${wlOnly?' · watchlist only':''}`;
+// ---------- history search (spec §4.6)
+function renderHist(){
+  const q=(document.getElementById('hq').value||'').trim().toLowerCase(); const out=document.getElementById('histOut');
+  if(q.length<2){ out.innerHTML='<div class="sub">Type at least two characters. Covers every title ever seen, attributed or not.</div>'; return; }
+  const hist={}; for(const s of D.sites) for(const [d,day] of Object.entries(D.presence[s])) for(const [gk,r] of Object.entries(day)) ((hist[gk] ||= {})[s] ||= {})[d]=r[0];
+  const res=[]; for(const [gk,g] of Object.entries(D.games)){ const n=g.name.toLowerCase(), p=(g.publisher||'').toLowerCase(); if(!n.includes(q)&&!p.includes(q)) continue; const rank=n===q?0:p===q?1:2; const cnt=Object.values(hist[gk]||{}).reduce((a,x)=>a+Object.keys(x).length,0); res.push({gk,g,rank,cnt}); }
+  res.sort((a,b)=>a.rank-b.rank||b.cnt-a.cnt);
+  const shown=res.slice(0,25);
+  out.innerHTML=shown.map(({gk,g})=>{ const h=hist[gk]||{}; const sites=Object.keys(h); const dates=[...new Set(D.sites.flatMap(s=>D.dates[s]))].sort(); const used=dates.filter(d=>sites.some(s=>h[s]&&h[s][d]!==undefined)); const first=used[0],last=used[used.length-1];
+    return `<div class="hcard"><h3>${esc(g.name)} <span class="sub">${g.publisher?esc(g.publisher):'<i>publisher not attributed</i>'} · ${sites.length} wall${sites.length===1?'':'s'} · ${first||'—'} → ${last||'—'}</span></h3><table class="hist"><tr><th></th>${dates.map(d=>`<th>${d.slice(5)}</th>`).join('')}</tr>${D.sites.map(s=>`<tr><th style="text-align:left">${D.site_label[s]}</th>${dates.map(d=>{ const cap=D.dates[s].includes(d); if(!cap) return '<td class="nc">·</td>'; const v=h[s]&&h[s][d]; return v===undefined?'<td class="nf">—</td>':`<td>${fmt(v)}</td>`; }).join('')}</tr>`).join('')}</table></div>`; }).join('') + (res.length>25?`<div class="sub">${res.length-25} more match — narrow the search</div>`:'') || '<div class="sub">No matches.</div>';
 }
 
-// ---- charts
-function lineChart(mount, legendEl, key, fmtY){
-  const W=560,H=240,m={t:14,r:16,b:30,l:52};
-  const series = ORDER.filter(p=>byPlat[p]).map(p=>({p,pts:byPlat[p].map(r=>({x:r.date,y:r[key],r}))}));
-  const xs = runs.map(r=>r.date), x0=Math.min(...xs), x1=Math.max(...xs), span=Math.max(x1-x0,3600e3);
-  const ymax = Math.max(1,...series.flatMap(s=>s.pts.map(q=>q.y)));
-  const nice=Math.pow(10,Math.floor(Math.log10(ymax))); const step=[1,2,2.5,5,10].map(k=>k*nice).find(k=>ymax/k<=5); const yTop=Math.ceil(ymax/step)*step;
-  const X=d=>m.l+(d-x0)/span*(W-m.l-m.r), Y=v=>H-m.b-v/yTop*(H-m.t-m.b);
-  let g='';
-  for(let v=0;v<=yTop;v+=step) g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink2)">${fmtY(v)}</text>`;
-  const seen=new Set(); for(let i=0;i<=4;i++){ const d=new Date(x0+span*i/4); const lab=span>3*864e5?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); if(seen.has(lab)) continue; seen.add(lab); g+=`<text x="${X(d)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--ink2)">${lab}</text>`; }
-  let paths='',dots='';
-  series.forEach(s=>{
-    const d=s.pts.map((q,i)=>(i?'L':'M')+X(q.x).toFixed(1)+' '+Y(q.y).toFixed(1)).join(' ');
-    paths+=`<path d="${d}" fill="none" stroke="${PL[s.p].color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-    s.pts.forEach(q=>{ const sus=q.r.suspect; dots+=`<circle cx="${X(q.x)}" cy="${Y(q.y)}" r="4" fill="${sus?'var(--surface)':PL[s.p].color}" stroke="${sus?PL[s.p].color:'var(--surface)'}" stroke-width="2" data-tip="${esc(PL[s.p].label+' · '+fmtDate(q.x)+' · '+fmtY(q.y)+(sus?' · suspect harvest':''))}"/>`; });
-    const last=s.pts[s.pts.length-1]; paths+=`<text x="${X(last.x)+8}" y="${Y(last.y)+4}" font-size="11" fill="var(--ink2)">${fmtY(last.y)}</text>`;
-  });
-  mount.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${g}${paths}${dots}</svg>`;
-  legendEl.innerHTML=series.map(s=>`<span><i style="background:${PL[s.p].color}"></i>${PL[s.p].label}</span>`).join('');
-}
-const tip=document.getElementById('tip');
-document.addEventListener('mousemove',e=>{ const t=e.target.closest('[data-tip]'); if(!t){tip.style.display='none';return;} tip.textContent=t.dataset.tip; tip.style.display='block'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY+12)+'px'; });
+// ---------- panels (spec §4.7, §4.8)
+function offersFor(keys,site){ const out=[]; for(const [ok,ref] of Object.entries(D.refs)){ if(site&&ref.site!==site) continue; const day=D.presence[ref.site][D.latest[ref.site]]; for(const k of keys){ const r=day&&day[k]; if(r&&r[2].some(v=>v[0]===ok)) { out.push({ok,ref,gk:k}); break; } } } return out.sort((a,b)=>b.ref.usd-a.ref.usd); }
+function ladderTable(ok){ const L=D.ladders[ok]||[]; const total=L.reduce((a,m)=>a+m[3],0); let cum=0; const paid=L.filter(m=>m[3]>0).length; const play=L.filter(m=>m[2]!=='spend').reduce((a,m)=>a+m[3],0);
+  const rows=L.map(m=>{ cum+=m[3]; const pct=total?cum/total*100:0; return `<tr class="${m[2]}"><td class="num">${m[0]}</td><td>${esc(m[1])}</td><td><span class="tag ${m[2]}">${m[2]}</span></td><td class="num">${m[3]?fmt(m[3]):'—'}</td><td><span class="bar" style="width:${Math.round(pct*0.8)}px"></span>${fmt(cum)} <span class="sub">${pct.toFixed(0)}%</span></td><td class="num">${m[4]??'—'}</td></tr>`; }).join('');
+  return {chips:`<div class="chips"><span class="chip">total ${fmt(total)}</span><span class="chip">steps ${L.length} (${paid} paid)</span><span class="chip">reachable by playing ${fmt(play)} (${total?Math.round(play/total*100):0}%)</span></div>`,
+    table:`<table><thead><tr><th class="num">Step</th><th>Milestone</th><th>Type</th><th class="num">Pays</th><th>Cumulative</th><th class="num">Limit</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="sub">milestones not captured</td></tr>'}</tbody></table>`}; }
+function openWall(site,keys){ const offers=offersFor(keys,site); const dlg=document.getElementById('panel');
+  put('#panelTitle','textContent',`${D.site_label[site]} — ${offers[0]?offers[0].ref.name:(D.games[keys[0]]?.name||'')}`);
+  put('#panelBody','innerHTML', offers.length? offers.map(o=>{ const t=ladderTable(o.ok); return `<h4 style="margin:6px 0 2px">${esc(o.ref.name)} <span class="sub">${esc(o.ref.plat)}</span></h4>${t.chips}${t.table}`; }).join('<hr style="border:0;border-top:1px solid #dfe3e8;margin:14px 0">') : '<div class="sub">Not listed on this wall in the latest capture — there is history, but no ladder to open.</div>');
+  dlg.showModal(); }
+function openCompare(keys){ const offers=offersFor(keys); if(offers.length<=1){ if(offers.length) openWall(offers[0].ref.site,keys); else openWall(D.sites[0],keys); return; }
+  const lads=offers.map(o=>D.ladders[o.ok]||[]); const n=Math.max(...lads.map(l=>l.length));
+  let rows=''; for(let i=0;i<n;i++){ const vals=lads.map(l=>l[i]?l[i][3]:null); const max=Math.max(...vals.map(v=>v??-1)); rows+=`<tr><td class="num">${i+1}</td>${lads.map((l,j)=>{ const m=l[i]; if(!m) return '<td style="color:#bbb">—</td>'; return `<td class="${m[3]===max&&max>0?'best':''}"><b>${m[3]?fmt(m[3]):'—'}</b> <span class="sub">${esc(m[1])}</span></td>`; }).join('')}</tr>`; }
+  rows+=`<tr><td></td>${lads.map(l=>`<td><b>Sum of steps ${fmt(l.reduce((a,m)=>a+m[3],0))}</b></td>`).join('')}</tr>`;
+  put('#panelTitle','textContent',`${D.games[keys[0]]?.name||''} — walls side by side`);
+  put('#panelBody','innerHTML',`<table><thead><tr><th class="num">#</th>${offers.map(o=>`<th>${D.site_label[o.ref.site]} <span class="sub">${esc(o.ref.plat)} · ${fmt(o.ref.usd)}</span></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><div class="caveat">Rows are aligned by position in each ladder, not by the step number a wall reports (Freecash numbers from 0 and skips; KashKick from 1). The sum of steps can slightly exceed the headline reward on Freecash, which lists a separate IAP cap beside the ladder.</div>`);
+  document.getElementById('panel').showModal(); }
+document.addEventListener('click',e=>{ const st=e.target.closest('td.st[data-wall]'); if(st){ openWall(st.dataset.wall, st.dataset.keys.split('||').filter(Boolean)); return; } const g=e.target.closest('.gname'); if(g) openCompare(g.dataset.keys.split('||').filter(Boolean)); });
 
-// ---- browser
-let curPlat=null, curRun=null, sortK='usd', sortDir=-1, rows=[];
-function buildSeg(){ const s=document.getElementById('bPlatSeg'); s.innerHTML=ORDER.filter(p=>byPlat[p]).map(p=>`<button data-p="${p}" class="${p===curPlat?'on':''}">${PL[p].label}</button>`).join('');
-  s.querySelectorAll('button').forEach(b=>b.onclick=()=>{curPlat=b.dataset.p; buildSeg(); buildRunSel(); loadBrowser();}); }
-function buildRunSel(){ const h=(byPlat[curPlat]||[]).slice().reverse(); const sel=document.getElementById('runSel'); sel.innerHTML=h.map(r=>`<option value="${r.data}">${fmtDate(r.date)} — ${r.games} games${r.suspect?' (suspect)':''}</option>`).join(''); curRun=h[0]?.data; sel.onchange=()=>{curRun=sel.value; loadBrowser();}; }
-async function loadBrowser(){
-  const d=await loadData(curRun);
-  rows=d.games.map(g=>({...g, company:matchCompany(g.name)?.company||'', n:g.ms.length, maxdays:Math.max(0,...g.ms.map(m=>+m.days||0))||null, types:[...new Set(g.ms.map(m=>m.ty))]}));
-  const types=[...new Set(rows.flatMap(g=>g.types))].sort(); const ts=document.getElementById('typeSel'); const cur=ts.value;
-  ts.innerHTML='<option value="">All milestone types</option>'+types.map(t=>`<option ${t===cur?'selected':''}>${esc(t)}</option>`).join('');
-  render();
-}
-function render(){
-  const q=document.getElementById('q').value.trim().toLowerCase(), ty=document.getElementById('typeSel').value;
-  let list=rows.filter(g=>(!wlOnly||g.company) && (!ty||g.types.includes(ty)) && (!q||(g.name+' '+g.company+' '+g.cat+' '+g.plat+' '+g.ms.map(m=>m.t).join(' ')).toLowerCase().includes(q)));
-  list.sort((a,b)=>{ const x=a[sortK],y=b[sortK]; if(x==null||x==='') return 1; if(y==null||y==='') return -1; return (typeof x==='number'?x-y:String(x).localeCompare(String(y)))*sortDir; });
-  const tb=document.querySelector('#games tbody');
-  tb.innerHTML=list.map((g,i)=>`<tr class="game ${g.company?'wl-row':''}" data-i="${i}"><td>${esc(g.name)}</td><td>${g.company?tagCo(g.name):''}</td><td>${esc(g.cat)}</td><td>${esc(g.plat)}</td><td class="num">${fmt2(g.usd)}</td><td class="num">${g.n}</td><td class="num">${g.maxdays??''}</td></tr>`).join('') || `<tr><td colspan="7" class="empty">No games match.</td></tr>`;
-  document.getElementById('count').textContent=`${list.length} of ${rows.length} games · ${list.reduce((s,g)=>s+g.n,0)} milestones`;
-  tb.querySelectorAll('tr.game').forEach(tr=>tr.onclick=()=>{
-    const nx=tr.nextElementSibling; if(nx&&nx.classList.contains('ms')){nx.remove();return;}
-    const g=list[+tr.dataset.i];
-    tr.insertAdjacentHTML('afterend',`<tr class="ms"><td colspan="7"><table class="mstab"><thead><tr><th>#</th><th>Milestone</th><th>Type</th><th class="num">USD</th><th class="num">Coins</th><th class="num">Days</th></tr></thead><tbody>${g.ms.map(m=>`<tr><td>${m.n}</td><td>${esc(m.t)}</td><td>${esc(m.ty)}</td><td class="num">${fmt2(m.usd)}</td><td class="num">${fmt(m.c)}</td><td class="num">${m.days??''}</td></tr>`).join('')}</tbody></table></td></tr>`);
-  });
-}
-document.getElementById('q').addEventListener('input',render); document.getElementById('typeSel').addEventListener('change',render);
-document.querySelectorAll('#games th.sort').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=['usd','n','maxdays'].includes(k)?-1:1;} render(); });
-
-function runsTable(){
-  document.querySelector('#runs tbody').innerHTML=runs.slice().reverse().map(r=>{
-    const fails=(r.checks||[]).filter(c=>!c.ok).map(c=>c.name+': '+c.detail).join(' · ');
-    return `<tr><td>${fmtDate(r.date)}${r.captured_at?'':' <span class="muted small">(time unknown)</span>'}</td><td><span class="dot" style="background:${PL[r.platform]?.color}"></span>${PL[r.platform]?.label||r.platform}</td><td class="num">${fmt(r.games)}${r.suspect?' <span class="muted small">suspect</span>':''}</td><td class="num">${fmt(r.milestones)}</td><td class="num">${fmt(r.total_usd)}</td><td class="${r.integrity==='PASS'?'ok':'fail'}" title="${esc(fails)}">${r.integrity}${fails?' ⚠':''}</td><td class="small"><a href="output/${esc(r.xlsx)}">xlsx</a> · <a href="data/${esc(r.data)}">json</a></td></tr>`;
-  }).join('');
+// ---------- KPIs (spec §4.2)
+function renderKpis(){
+  const cards=D.sites.map(s=>{ const ds=D.dates[s]; const d=ds[ds.length-1], p=ds[ds.length-2]; const n=D.date_runs[s][d].games, pn=p?D.date_runs[s][p].games:null; const dl=pn==null?'':`<span style="color:${n-pn>=0?C().up:C().down}">${n-pn>=0?'+':'−'}${Math.abs(n-pn)}</span> vs previous capture`;
+    return `<div class="kpi"><div class="l">${D.site_label[s]} · ${d}</div><div class="v">${n}</div><div class="d">offers ${dl}</div></div>`; }).join('');
+  const listed=D.block1.filter(b=>D.sites.some(s=>pres(s,D.latest[s],b.keys))).length;
+  put('#kpis','innerHTML',cards+`<div class="kpi"><div class="l">Focus games listed</div><div class="v" id="kFocus">${listed}/${D.block1.length}</div><div class="d">on at least one wall</div></div><div class="kpi"><div class="l">Competitor extras</div><div class="v">${D.block2.length}</div><div class="d">not on the focus list</div></div>`);
 }
 
-function refresh(){ tiles(); watchTable(); eventTable(); render(); }
-document.getElementById('rangeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ range=+b.dataset.d; b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); evLimit=150; refresh(); });
-document.getElementById('platSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ platF=b.dataset.p; b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); evLimit=150; refresh(); });
-document.getElementById('typeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ typeF=b.dataset.t; b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); evLimit=150; eventTable(); });
-document.getElementById('wlOnly').onchange=e=>{ wlOnly=e.target.checked; evLimit=150; refresh(); };
-document.getElementById('evq').addEventListener('input',()=>{evLimit=150; eventTable();});
+// ---------- email (spec §5)
+function findings(){
+  const {date:chosen}=chosenDate(); const out=[]; const focusPubs=D.publishers.filter(p=>p.focus).map(p=>p.publisher);
+  const rows=[...D.block1,...D.block2.map(b=>({...b,block2:true}))];
+  for(const pub of focusPubs){ const items=[];
+    for(const r of rows){ if((r.publisher||'')!==pub) continue; const cells=D.sites.map(s=>({s,c:cellOf(s,r.keys)}));
+      const added=cells.filter(x=>x.c.st==='Added').map(x=>D.site_label[x.s]); const listed=cells.some(x=>x.c.now);
+      if(added.length) items.push({o:0,t:`${r.game} (${pub}) — newly listed on ${added.join(', ')}`});
+      else if(r.block2&&listed) items.push({o:1,t:`${r.game} (${pub})`});
+      for(const x of cells) if(x.c.st==='Remains'&&(x.c.dReward!=null||x.c.dTasks!=null)){ const parts=[]; if(x.c.dReward!=null) parts.push(`reward ${fmt(x.c.before[0])} → ${fmt(x.c.now[0])}`); if(x.c.dTasks!=null) parts.push(`milestones ${x.c.before[1]} → ${x.c.now[1]}`); items.push({o:2,t:`${r.game} (${pub}) on ${D.site_label[x.s]} — ${parts.join(', ')}`}); } }
+    items.sort((a,b)=>a.o-b.o); out.push(...items.map(i=>i.t)); }
+  return out;
+}
+function buildEmail(){
+  const {date:chosen}=chosenDate(); const F='font-family:Calibri,Arial,sans-serif;font-size:14px;color:#1f1f1f';
+  const own=Object.entries(D.games).filter(([gk,g])=>g.playtika).map(([gk,g])=>{ const walls=D.sites.filter(s=>pres(s,D.latest[s],[gk])).map(s=>D.site_label[s]); return walls.length?`${g.name} (${walls.join(', ')})`:null; }).filter(Boolean);
+  const changes=[]; for(const r of [...D.block1,...D.block2]){ const a=[],rm=[]; for(const s of D.sites){ const st=cellOf(s,r.keys).st; if(st==='Added') a.push(D.site_label[s]); if(st==='Removed') rm.push(D.site_label[s]); } if(a.length||rm.length) changes.push(`${r.game} — ${[a.length?`added on ${a.join(', ')}`:'',rm.length?`removed from ${rm.join(', ')}`:''].filter(Boolean).join('; ')}`); }
+  const nf=findings();
+  const tbl=t=>t.replace(/<table/g,'<table style="border-collapse:collapse;font-size:13px"').replace(/<th/g,'<th style="border:1px solid #cfcfcf;padding:5px 8px;background:#f0f3f6;text-align:left"').replace(/<td(?![^>]*style=)/g,'<td style="border:1px solid #cfcfcf;padding:5px 8px"').replace(/<td style="/g,'<td style="border:1px solid #cfcfcf;padding:5px 8px;');
+  const legend=`<div style="${F};font-size:12px;margin:6px 0">${Object.entries(C()).filter(([k])=>!['up','down'].includes(k)).map(([k,[bg]])=>`<span style="display:inline-block;width:12px;height:12px;background:${bg};border:1px solid #bbb;vertical-align:-2px;margin-right:4px"></span>${k}&nbsp;&nbsp;`).join('')} ▲ / ▼ change vs last check</div>`;
+  const ul=a=>a.length?`<ul style="margin:4px 0 10px 20px;padding:0">${a.map(x=>`<li style="margin:2px 0">${esc(x)}</li>`).join('')}</ul>`:`<div style="margin:4px 0 10px 20px;color:#666">none</div>`;
+  const body=`<div style="${F}"><p>Hello everyone,</p><p>Please find below the latest check regarding Playtika competitors in the offerwalls ${D.sites.map(s=>D.site_label[s]).join(', ')}. This check covers what changed since ${chosen}.</p>
+<p><b>Notable Findings:</b></p>${ul(nf)}<p>Our own titles currently listed: ${own.length?esc(own.join('; ')):'none'}</p><p>Changes since ${chosen}:</p>${ul(changes)}
+<p><b>Direct Top Competitors Status:</b></p>${legend}<table>${focusTable(true)}</table>
+<p style="margin-top:14px"><b>Where Each Competitor Stands:</b></p><table>${pubTable(true)}</table><p>Thanks,</p></div>`;
+  return {subject:`Competitors Status in Popular Offerwalls (${longDate(D.check_date)})`, html:tbl(body)};
+}
+function emailText(html){ const d=document.createElement('div'); d.innerHTML=html; d.querySelectorAll('tr').forEach(tr=>tr.append('\n')); d.querySelectorAll('td,th').forEach(c=>c.append('\t')); d.querySelectorAll('p,li,div').forEach(p=>p.append('\n')); return d.textContent.replace(/\n{3,}/g,'\n\n'); }
+async function copyHtml(el,html){
+  try{ if(navigator.clipboard&&window.ClipboardItem&&window.isSecureContext){ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([emailText(html)],{type:'text/plain'})})]); return true; } }catch(e){}
+  try{ const r=document.createRange(); r.selectNodeContents(el); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); const ok=document.execCommand('copy'); sel.removeAllRanges(); return ok; }catch(e){ return false; }
+}
+function openEmail(){ const {subject,html}=buildEmail(); put('#subjLine','textContent','Subject: '+subject); put('#emailBody','innerHTML',html); document.getElementById('copySubj').onclick=async()=>{ try{ await navigator.clipboard.writeText(subject); }catch(e){ const t=document.createElement('textarea'); t.value=subject; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast('Subject copied'); };
+  document.getElementById('copyBody').onclick=async()=>{ const ok=await copyHtml(document.getElementById('emailBody'),html); toast(ok?'Email copied — paste into Outlook with Ctrl+V':'Copy failed — select the preview and copy manually'); };
+  document.getElementById('dlg').showModal(); }
 
-(async function(){
-  try{
-    const [R,E,W]=await Promise.all([jsonl('runs.jsonl'), jsonl('events.jsonl'), fetch('watchlist.json?_='+Date.now()).then(r=>r.ok?r.json():{companies:[]}).catch(()=>({companies:[]}))]);
-    runs=R; runs.forEach(x=>{x.date=x.captured_at?new Date(x.captured_at):tsDate(x.ts);}); runs.sort((a,b)=>a.date-b.date);
-    byPlat={}; runs.forEach(x=>{(byPlat[x.platform] ||= []).push(x)});
-    events=E; events.forEach(e=>{e.date=e.captured_at?new Date(e.captured_at):tsDate(e.ts);});
-    TIERS=W.tiers||{};
-    watch=(W.games||[]).map(g=>({name:g.name, company:g.publisher||'—', genre:g.genre||'', list:g.list||'', priority:g.priority||9, keys:[g.name,...(g.aliases||[])].map(norm).filter(Boolean)}));
-    watch.forEach(w=>w.maxKey=Math.max(...w.keys.map(k=>k.length))); watch.sort((a,b)=>b.maxKey-a.maxKey);
-    if(!runs.length){ document.getElementById('sub').textContent='no runs yet'; return; }
-    for(const p of ORDER){ if(byPlat[p]){ const good=byPlat[p].filter(r=>!r.suspect); const l=(good.length?good:byPlat[p]).slice(-1)[0]; latest[p]=await loadData(l.data); } }
-    curPlat=ORDER.find(p=>byPlat[p]); buildSeg(); buildRunSel(); await loadBrowser();
-    tiles(); watchTable(); eventTable();
-    lineChart(document.getElementById('chartGames'),document.getElementById('legend1'),'games',v=>fmt(v));
-    lineChart(document.getElementById('chartUsd'),document.getElementById('legend2'),'total_usd',v=>'$'+fmt(v));
-    runsTable();
-  }catch(e){ document.getElementById('sub').textContent='failed to load: '+e.message; console.error(e); }
-})();
+// ---------- wiring
+function renderAll(){ const {date,clamped}=chosenDate(); put('#baselineNote','textContent',`vs ${date}${clamped?' · earliest we hold':''}`); renderKpis(); renderFocus(); renderPub(); }
+function init(){
+  audit(['tabs','win','baselineNote','q','fs','fw','btnEmail','kpis','p-focus','legend','focusTbl','p-pub','pubTbl','pubCaveat','p-cat','catTbl','p-hist','hq','histOut','panel','panelTitle','panelBody','dlg','subjLine','emailBody','copySubj','copyBody','toast','checkChip']);
+  document.title=`Offerwall competitive status — ${longDate(D.check_date)}`; put('#checkChip','textContent',`check ${longDate(D.check_date)}`);
+  const fw=document.getElementById('fw'); D.sites.forEach(s=>fw.insertAdjacentHTML('beforeend',`<option value="${s}">${D.site_label[s]}</option>`));
+  document.getElementById('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{ b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t)); });
+  document.getElementById('win').onchange=e=>{ S.win=e.target.value; renderAll(); };
+  document.getElementById('q').oninput=e=>{ S.q=e.target.value.trim(); renderFocus(); };
+  document.getElementById('fs').onchange=e=>{ S.fs=e.target.value; renderFocus(); };
+  fw.onchange=e=>{ S.fw=e.target.value; renderFocus(); };
+  document.getElementById('hq').oninput=renderHist;
+  document.getElementById('btnEmail').onclick=openEmail;
+  renderAll(); renderCatalog(); renderHist();
+}
+fetch('dash_data.json?_='+Date.now()).then(r=>r.json()).then(d=>{ D=d; init(); }).catch(e=>{ document.body.insertAdjacentHTML('afterbegin',`<div style="padding:20px;color:#990000">Failed to load dash_data.json: ${esc(e.message)}</div>`); console.error(e); });
 </script>
 </body>
 </html>
