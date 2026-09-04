@@ -45,7 +45,7 @@ tr.game{cursor:pointer}tr.game:hover td{background:var(--chip)}tr.ms td{backgrou
 .up{color:var(--good)}.down{color:var(--bad)}.ok{color:var(--good)}.fail{color:var(--bad)}.muted{color:var(--ink3)}.small{font-size:12px}
 .day{padding:8px 8px 4px;color:var(--ink2);font-weight:600;font-size:12px;background:var(--bg);position:sticky;top:31px}
 .pres{display:inline-flex;flex-direction:column;gap:2px;min-width:120px}.pres .absent{color:var(--ink3)}
-.wl-row td{background:transparent}.wl-row.p1 td{background:color-mix(in srgb,var(--hi) 55%,transparent)}
+.wl-row td{background:transparent}.wl-row.p1 td{background:color-mix(in srgb,var(--hi) 55%,transparent)}.wl-row.absent td b{color:var(--ink2);font-weight:500}
 .empty{color:var(--ink3);padding:20px;text-align:center}
 .more{display:block;width:100%;padding:10px;background:var(--chip);border:0;color:var(--ink2);font:inherit;cursor:pointer}
 .chg{display:inline-flex;gap:8px;flex-wrap:wrap}
@@ -69,7 +69,7 @@ tr.game{cursor:pointer}tr.game:hover td{background:var(--chip)}tr.ms td{backgrou
 <section>
   <h2>Watchlist <span class="muted small" id="wlNote"></span></h2>
   <div class="tbl" style="max-height:none"><table id="wl"><thead><tr>
-    <th>Company</th><th>Game</th><th>KashKick</th><th>Freecash</th><th>TesterUp</th><th>Changes in range</th><th>Last event</th>
+    <th>Game</th><th>Genre</th><th>KashKick</th><th>Freecash</th><th>TesterUp</th><th>Changes in range</th><th>Last event</th>
   </tr></thead><tbody></tbody></table></div>
 </section>
 <section>
@@ -125,12 +125,13 @@ async function jsonl(u){ const r=await fetch(u+'?_='+Date.now()); if(!r.ok) retu
 async function loadData(rel){ if(!cache[rel]){ const r=await fetch('data/'+rel); cache[rel]=await r.json(); } return cache[rel]; }
 
 // ---- watchlist matching
+let TIERS = {};
 function matchCompany(name){
   const n = norm(name);
-  for(const w of watch) if(w.keys.some(k=>k.length>=4 && n.includes(k))) return w;
+  for(const w of watch) if(w.keys.some(k=>k.length>=4 && n.includes(k))) return w;   // watch is sorted longest-key-first
   return null;
 }
-function tagCo(name){ const w=matchCompany(name); return w?`<span class="co ${w.priority===1?'p1':''}">${esc(w.company)}</span>`:''; }
+function tagCo(name){ const w=matchCompany(name); return w?`<span class="co ${w.priority===1?'p1':''}" title="${esc(w.genre)} · ${esc(TIERS[w.list]||w.list)}">${esc(w.company)}</span>`:''; }
 
 // ---- filters
 const since = () => range ? new Date(Date.now()-range*864e5) : new Date(0);
@@ -152,31 +153,35 @@ function tiles(){
     <div class="tile"><div class="lab">Left</div><div class="val down">−${c('removed')}</div><div class="meta">${range?`last ${range} days`:'all time'}</div></div>
     <div class="tile"><div class="lab">Reward changes</div><div class="val">${c('reward')}</div><div class="meta">headline reward moved</div></div>
     <div class="tile"><div class="lab">Milestone changes</div><div class="val">${c('milestones')}</div><div class="meta">count of steps changed</div></div>
-    <div class="tile"><div class="lab">Watchlist events</div><div class="val">${wlc}</div><div class="meta">${watch.length} companies tracked</div></div>`;
+    <div class="tile"><div class="lab">Watchlist events</div><div class="val">${wlc}</div><div class="meta">${watch.length} games tracked</div></div>`;
   document.getElementById('sub').textContent = lastRun ? `${runs.length} runs · last harvest ${fmtDate(lastRun.date)}` : 'no runs yet';
 }
 
 // ---- watchlist table: one row per watched game that exists (now or in range) on any platform
 function watchTable(){
   const s=since();
-  const rowsByKey = new Map();   // key: company|normalizedGameName
-  const add = (w, gname) => { const k=w.company+'|'+norm(gname); if(!rowsByKey.has(k)) rowsByKey.set(k,{w,name:gname,pres:{},ev:[]}); return rowsByKey.get(k); };
-  // current presence from latest snapshots
+  // one row per watchlist entry (canonical name), always shown — even when absent everywhere
+  const rowsByKey = new Map(watch.map(w=>[w.name,{w,name:w.name,pres:{},ev:[]}]));
   for(const p of ORDER){ const L=latest[p]; if(!L) continue;
-    for(const g of L.games){ const w=matchCompany(g.name); if(!w) continue; const r=add(w,g.name); (r.pres[p] ||= []).push(g); } }
-  // events in range
-  for(const e of events){ if(e.date<s) continue; const w=matchCompany(e.game); if(!w) continue; if(platF&&e.platform!==platF) continue; add(w,e.game).ev.push(e); }
+    for(const g of L.games){ const w=matchCompany(g.name); if(!w) continue; (rowsByKey.get(w.name).pres[p] ||= []).push(g); } }
+  for(const e of events){ if(e.date<s) continue; const w=matchCompany(e.game); if(!w) continue; if(platF&&e.platform!==platF) continue; rowsByKey.get(w.name).ev.push(e); }
   let rows=[...rowsByKey.values()];
   if(platF) rows = rows.filter(r=>r.pres[platF]||r.ev.length);
-  rows.sort((a,b)=> (a.w.priority-b.w.priority) || a.w.company.localeCompare(b.w.company) || a.name.localeCompare(b.name));
+  rows.sort((a,b)=> (a.w.priority-b.w.priority) || a.w.genre.localeCompare(b.w.genre) || a.name.localeCompare(b.name));
   const cell = (r,p) => { const gs=r.pres[p]; if(!gs) return `<span class="pres"><span class="absent">—</span></span>`;
     return `<span class="pres">${gs.map(g=>`<span title="${esc(g.plat)}">$${fmt(g.usd)} <span class="muted">· ${g.ms.length} steps · ${esc(g.plat)}</span></span>`).join('')}</span>`; };
   const chg = r => { const c={}; r.ev.forEach(e=>c[e.type]=(c[e.type]||0)+1); const parts=Object.entries(c).map(([t,n])=>`<span class="badge b-${t}">${TYPE[t]} ${n}</span>`); return parts.length?`<span class="chg">${parts.join('')}</span>`:'<span class="muted">no changes</span>'; };
   const last = r => { if(!r.ev.length) return ''; const e=r.ev.reduce((a,b)=>a.date>b.date?a:b); return `<span class="small">${fmtDate(e.date)} · ${PL[e.platform].label} · ${evDetail(e)}</span>`; };
   const tb=document.querySelector('#wl tbody');
-  tb.innerHTML = rows.map(r=>`<tr class="wl-row ${r.w.priority===1?'p1':''}"><td>${esc(r.w.company)}</td><td><b>${esc(r.name)}</b></td><td>${cell(r,'kashkick')}</td><td>${cell(r,'freecash')}</td><td>${cell(r,'testerup')}</td><td>${chg(r)}</td><td>${last(r)}</td></tr>`).join('')
-    || `<tr><td colspan="7" class="empty">No watchlist games found in the catalogs${platF?' on this platform':''}. Edit watchlist.json to add games.</td></tr>`;
-  document.getElementById('wlNote').textContent = `— ${rows.length} watched games present or changed ${range?`in the last ${range} days`:''}`;
+  let html='', lastTier=null;
+  for(const r of rows){
+    if(r.w.list!==lastTier){ lastTier=r.w.list; html+=`<tr><td colspan="7" class="day">${esc(TIERS[lastTier]||lastTier)}</td></tr>`; }
+    const anywhere = ORDER.some(p=>r.pres[p]);
+    html+=`<tr class="wl-row ${r.w.priority===1?'p1':''} ${anywhere?'':'absent'}"><td><b>${esc(r.name)}</b><div class="small muted">${esc(r.w.company)}</div></td><td class="small muted">${esc(r.w.genre)}</td><td>${cell(r,'kashkick')}</td><td>${cell(r,'freecash')}</td><td>${cell(r,'testerup')}</td><td>${chg(r)}</td><td>${last(r)}</td></tr>`;
+  }
+  tb.innerHTML = html || `<tr><td colspan="7" class="empty">No watchlist games${platF?' on this platform':''}. Edit focus_games.csv and run build_watchlist.py.</td></tr>`;
+  const present = rows.filter(r=>ORDER.some(p=>r.pres[p])).length;
+  document.getElementById('wlNote').textContent = `— ${present} of ${rows.length} watched games are in a catalog now`;
 }
 
 function evDetail(e){
@@ -278,7 +283,9 @@ document.getElementById('evq').addEventListener('input',()=>{evLimit=150; eventT
     runs=R; runs.forEach(x=>{x.date=x.captured_at?new Date(x.captured_at):tsDate(x.ts);}); runs.sort((a,b)=>a.date-b.date);
     byPlat={}; runs.forEach(x=>{(byPlat[x.platform] ||= []).push(x)});
     events=E; events.forEach(e=>{e.date=e.captured_at?new Date(e.captured_at):tsDate(e.ts);});
-    watch=(W.companies||[]).map(c=>({company:c.name, priority:c.priority||9, keys:[...(c.games||[]),...(c.aliases||[])].map(norm).filter(Boolean)}));
+    TIERS=W.tiers||{};
+    watch=(W.games||[]).map(g=>({name:g.name, company:g.publisher||'—', genre:g.genre||'', list:g.list||'', priority:g.priority||9, keys:[g.name,...(g.aliases||[])].map(norm).filter(Boolean)}));
+    watch.forEach(w=>w.maxKey=Math.max(...w.keys.map(k=>k.length))); watch.sort((a,b)=>b.maxKey-a.maxKey);
     if(!runs.length){ document.getElementById('sub').textContent='no runs yet'; return; }
     for(const p of ORDER){ if(byPlat[p]){ const good=byPlat[p].filter(r=>!r.suspect); const l=(good.length?good:byPlat[p]).slice(-1)[0]; latest[p]=await loadData(l.data); } }
     curPlat=ORDER.find(p=>byPlat[p]); buildSeg(); buildRunSel(); await loadBrowser();
