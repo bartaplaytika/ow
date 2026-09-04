@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harvest status</title>
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--line:#dfe3e8;--ink:#1f1f1f;--ink2:#555;--ink3:#888;--brand:#1f4e79;--green:#1e9e4a;--orange:#e8930c;--red:#d93025}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Calibri,"Segoe UI",Arial,sans-serif}
+header{background:var(--brand);color:#fff;padding:12px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}header h1{font-size:18px;margin:0;font-weight:600}header a{color:#cfe0f3;font-size:13px;text-decoration:none}.spacer{flex:1}
+main{padding:18px 22px 40px;max-width:1100px;margin:0 auto}
+.hero{display:flex;align-items:center;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:14px}
+.light{width:54px;height:54px;border-radius:50%;flex:none;box-shadow:0 0 0 6px rgba(0,0,0,.05) inset}.light.green{background:var(--green);box-shadow:0 0 18px var(--green)}.light.orange{background:var(--orange);box-shadow:0 0 18px var(--orange)}.light.red{background:var(--red);box-shadow:0 0 18px var(--red)}.light.grey{background:#bbb}
+.hero h2{margin:0 0 4px;font-size:20px}.hero .why{color:var(--ink2)}.hero .next{margin-left:auto;text-align:right;color:var(--ink2);font-size:13px}.hero .next b{display:block;font-size:18px;color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.card .l{font-size:12px;color:var(--ink2)}.card .v{font-size:24px;font-weight:600;margin:2px 0}.card .d{font-size:12px;color:var(--ink3)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}.dot.green{background:var(--green)}.dot.orange{background:var(--orange)}.dot.red{background:var(--red)}.dot.grey{background:#bbb}
+h3{font-size:15px;margin:14px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:13px;background:var(--surface)}th,td{padding:7px 9px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f0f3f6;color:var(--ink2);font-weight:600;white-space:nowrap}td.num{text-align:right;white-space:nowrap}
+.ok{color:var(--green)}.warn{color:var(--orange)}.bad{color:var(--red)}.muted{color:var(--ink3)}.small{font-size:12px}
+.tbl{overflow-x:auto;border-radius:8px;border:1px solid var(--line)}.tbl table{border:0}
+ul.warn{margin:6px 0 0 18px;padding:0;color:var(--ink2);font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>Harvest status</h1><span class="spacer"></span><a href="index.html">Tracker</a><a href="overview.html">Trends &amp; change log</a></header>
+<main>
+  <div class="hero"><div class="light grey" id="light"></div><div><h2 id="headline">Loading…</h2><div class="why" id="why"></div></div><div class="next"><span>Next scheduled run</span><b id="next">—</b><span id="nextIn"></span></div></div>
+  <div class="cards" id="cards"></div>
+  <h3>Recent harvests <span class="muted small">— one row per scheduled run (captures within 90 minutes are grouped); times are local</span></h3>
+  <div class="tbl"><table id="runs"><thead><tr><th>Started</th><th>Result</th><th>Freecash</th><th>Kashkick</th><th>TesterUp</th><th>Published</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+  <h3>Build warnings from the last publish <span class="muted small" id="warnTs"></span></h3>
+  <ul class="warn" id="warnings"></ul>
+</main>
+<script>
+'use strict';
+const AUTO_SINCE=new Date('2026-09-04T17:00:00Z'); // earlier rows are manual imports, not graded
+const SITES=['freecash','kashkick','testerup'], LABEL={freecash:'Freecash',kashkick:'Kashkick',testerup:'TesterUp'};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtT=d=>d.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const tsDate=ts=>{const m=ts.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/);return new Date(Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5]));};
+const ago=ms=>{const m=Math.round(ms/6e4); if(m<60) return `${m} min`; const h=Math.floor(m/60); return h<48?`${h} h ${m%60} min`:`${Math.floor(h/24)} days`;};
+async function jsonl(u){const r=await fetch(u+'?_='+Date.now()); if(!r.ok) throw new Error(u+' '+r.status); return (await r.text()).split('\n').filter(Boolean).map(l=>JSON.parse(l));}
+function nextRun(sched,from){ const hrs=sched.hours_utc, min=sched.minute; const d=new Date(from); for(let i=0;i<48;i++){ const c=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),d.getUTCHours()+i,min,0)); if(c>from && hrs.includes(c.getUTCHours())) return c; } return null; }
+function group(runs){ // cluster captures into harvests: a new group starts when > 90 min after the group's first capture
+  const out=[]; for(const r of runs){ const g=out[out.length-1]; if(g && r.date-g.start<90*6e4){ g.items.push(r); g.end=r.date; } else out.push({start:r.date,end:r.date,items:[r]}); } return out; }
+function grade(h, sched){ // per harvest: green all three PASS & not suspect; orange otherwise
+  const by={}; h.items.forEach(r=>{ by[r.platform]=r; }); const missing=SITES.filter(s=>!by[s]); const bad=Object.values(by).filter(r=>r.integrity!=='PASS'||r.suspect);
+  const notes=[]; if(missing.length) notes.push(`missing: ${missing.map(s=>LABEL[s]).join(', ')}`); for(const r of bad){ const f=(r.checks||[]).filter(c=>!c.ok).map(c=>c.name).join('; '); notes.push(`${LABEL[r.platform]}: ${r.suspect?'suspect (partial) harvest':''}${r.integrity!=='PASS'?(r.suspect?' · ':'')+'FAIL — '+f:''}`); }
+  return {by, level: (missing.length||bad.length)?'orange':'green', notes};
+}
+(async function(){
+  try{
+    const [runs,status]=await Promise.all([jsonl('runs.jsonl'), fetch('status.json?_='+Date.now()).then(r=>r.ok?r.json():null)]);
+    runs.forEach(r=>{r.date=r.captured_at?new Date(r.captured_at):tsDate(r.ts);}); runs.sort((a,b)=>a.date-b.date);
+    const sched=(status&&status.schedule)||{hours_utc:[0,6,12,18],minute:43,every_hours:6};
+    const now=new Date(); const harvests=group(runs).reverse(); const last=harvests[0]; const lg=last?grade(last,sched):null;
+    const published=status&&status.published_at?new Date(status.published_at):null;
+    // overall light
+    const overdue = !last || (now-last.start) > (sched.every_hours*60+75)*6e4;   // one full cycle + 75 min grace
+    let level, head, why;
+    if(overdue){ level='red'; head='Not connected — no harvest arrived when one was due'; why=last?`Last harvest started ${fmtT(last.start)} (${ago(now-last.start)} ago); a run was expected since then. Check that the Mac is awake, Chrome and the Claude app are open, and the task is enabled.`:'No runs recorded yet.'; }
+    else if(lg.level==='orange'){ level='orange'; head='Running, but the last harvest had a problem'; why=lg.notes.join(' · '); }
+    else { level='green'; head='All good'; why=`Last harvest ${fmtT(last.start)} (${ago(now-last.start)} ago): all three platforms captured and passed integrity checks.`; }
+    if(level==='green' && published && (last.end-published)>0 && (now-published)>(sched.every_hours*60+75)*6e4){ level='orange'; head='Harvested, but the dashboard was not published'; why=`Latest publish ${fmtT(published)}; the last harvest is newer.`; }
+    document.getElementById('light').className='light '+level; document.getElementById('headline').textContent=head; document.getElementById('why').textContent=why;
+    const nx=nextRun(sched, now); document.getElementById('next').textContent=nx?fmtT(nx):'—'; document.getElementById('nextIn').textContent=nx?`in ${ago(nx-now)} · every ${sched.every_hours} h`:'';
+    // per-platform cards (latest capture of each)
+    const cards=SITES.map(s=>{ const rs=runs.filter(r=>r.platform===s); const r=rs[rs.length-1]; if(!r) return `<div class="card"><div class="l">${LABEL[s]}</div><div class="v muted">—</div><div class="d">never captured</div></div>`;
+      const ok=r.integrity==='PASS'&&!r.suspect; const stale=(now-r.date)>(sched.every_hours*60+75)*6e4; const cls=stale?'red':ok?'green':'orange';
+      return `<div class="card"><div class="l"><span class="dot ${cls}"></span>${LABEL[s]}</div><div class="v">${r.games.toLocaleString()} <span class="small muted">games</span></div><div class="d">${r.milestones.toLocaleString()} milestones · <span class="${ok?'ok':'warn'}">${r.integrity}${r.suspect?' · suspect':''}</span><br>${fmtT(r.date)} (${ago(now-r.date)} ago)</div></div>`; }).join('');
+    document.getElementById('cards').innerHTML=cards+`<div class="card"><div class="l"><span class="dot ${published&&(now-published)<(sched.every_hours*60+75)*6e4?'green':'orange'}"></span>Dashboard published</div><div class="v">${published?ago(now-published):'—'}</div><div class="d">${published?fmtT(published)+' · ago':'no status.json yet'}</div></div>`;
+    // harvest table
+    const cell=r=>r?`<td class="num"><span class="${r.integrity==='PASS'&&!r.suspect?'ok':'warn'}">●</span> ${r.games} <span class="muted small">/ ${r.milestones.toLocaleString()}</span></td>`:`<td class="num muted">—</td>`;
+    document.querySelector('#runs tbody').innerHTML=harvests.slice(0,40).map(h=>{ const g=h.start<AUTO_SINCE?{by:Object.fromEntries(h.items.map(r=>[r.platform,r])),level:'grey',notes:['manual import (before automation)']}:grade(h,sched); const pub=published&&published>=h.end&&(!harvests.find(x=>x.start>h.end&&published>=x.end));
+      return `<tr><td>${fmtT(h.start)}${h.items.length>1&&h.end-h.start>60e3?` <span class="muted small">→ ${h.end.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})}</span>`:''}</td><td><span class="dot ${g.level}"></span>${g.level==='green'?'OK':g.level==='grey'?'Manual':'Problem'}</td>${SITES.map(s=>cell(g.by[s])).join('')}<td class="small">${pub?'<span class="ok">✓</span> '+fmtT(published):'<span class="muted">—</span>'}</td><td class="small">${esc(g.notes.join(' · '))||'<span class="muted">—</span>'}</td></tr>`; }).join('');
+    // warnings
+    const w=(status&&status.warnings)||[]; document.getElementById('warnTs').textContent=published?`(${fmtT(published)})`:''; document.getElementById('warnings').innerHTML=w.length?w.map(x=>`<li>${esc(x)}</li>`).join(''):'<li class="muted">none</li>';
+  }catch(e){ document.getElementById('light').className='light red'; document.getElementById('headline').textContent='Cannot read status data'; document.getElementById('why').textContent=e.message; }
+})();
+</script>
+</body>
+</html>
