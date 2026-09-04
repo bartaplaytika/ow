@@ -1,0 +1,6 @@
+{
+  "_help": "Edit freely. Each company has a priority (1 = highest) and a list of game names; a catalog offer matches when its name contains one of the names (case/punctuation-insensitive). Add 'aliases' for alternative spellings. Re-publish with: python3 publish_to_github.py",
+  "companies": [
+    {"name": "Playtika", "priority": 1, "games": ["Slotomania", "Bingo Blitz", "Solitaire Grand Harvest", "Best Fiends", "WSOP", "House of Fun", "Caesars Slots", "Board Kings", "Redecor", "Domino Dreams", "Dice Dreams", "Junes Journey", "Switchcraft", "Pirate Kings", "Animals & Coins", "Merge Hotel Empire"]}
+  ]
+}
