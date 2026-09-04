@@ -114,7 +114,7 @@
         else if (r.block2 && listed) items.push({ o: 1, t: `${gameLink(D, o, r)} (${pn})` });
         for (const x of cells) if (x.c.st === 'Remains' && (bigMove(D, x.c) || x.c.dTasks != null)) {
           const parts = [];
-          if (bigMove(D, x.c)) parts.push(`reward ${fmt(x.c.before[0])} → ${fmt(x.c.now[0])} (${x.c.dReward > 0 ? '+' : '−'}${Math.round(Math.abs(x.c.dReward) / x.c.before[0] * 100)}%)`);
+          if (bigMove(D, x.c)) parts.push(`reward ${fmt(x.c.before[0])} → ${fmt(x.c.now[0])} (<span style="color:${x.c.dReward > 0 ? C(D).up : C(D).down}">${x.c.dReward > 0 ? '+' : '−'}${fmt(Math.abs(x.c.dReward))}</span>)`);
           if (x.c.dTasks != null) parts.push(`milestones ${x.c.before[1]} → ${x.c.now[1]}`);
           items.push({ o: 2, t: `${gameLink(D, o, r)} (${pn}) on ${D.site_label[x.s]} — ${parts.join(', ')}` });
         }
