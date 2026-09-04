@@ -102,26 +102,38 @@
   const ADDED = `<span style="color:#137333;font-weight:600">added</span>`, REMOVED = `<span style="color:#c5221f;font-weight:600">removed</span>`;
   const bigMove = (D, c) => c.dReward != null && c.before && c.before[0] > 0 && Math.abs(c.dReward) / c.before[0] > (D.reward_move_pct ?? 0.10);
   const gameLink = (D, o, r) => (o.baseUrl && r.keys && r.keys.length) ? `<a href="${link(D, o, { game: r.keys[0], win: o.win })}" style="color:#1f4e79;text-decoration:none">${esc(r.game)}</a>` : esc(r.game);
+  // Notable Findings. Gate: publishers with focus=yes only, in publishers.csv order. Each item gets a size score
+  // (reward at stake) so the email can show only the biggest MAX_FINDINGS and point to the dashboard for the rest.
   function findings(D, o) {
-    const out = []; const focusPubs = D.publishers.filter(p => p.focus).map(p => p.publisher);
+    const all = []; const focusPubs = D.publishers.filter(p => p.focus).map(p => p.publisher);
     const rows = [...D.block1, ...D.block2.map(b => ({ ...b, block2: true }))];
-    for (const pub of focusPubs) {
+    focusPubs.forEach((pub, pi) => {
       const items = []; const pn = esc(pubName(D, pub));
       for (const r of rows) {
         if ((r.publisher || '') !== pub) continue; const cells = D.sites.map(s => ({ s, c: cellOf(D, o, s, r.keys) }));
-        const added = cells.filter(x => x.c.st === 'Added').map(x => D.site_label[x.s]); const listed = cells.some(x => x.c.now);
-        if (added.length) items.push({ o: 0, t: `${gameLink(D, o, r)} (${pn}) — newly ${ADDED} on ${added.join(', ')}` });
-        else if (r.block2 && listed) items.push({ o: 1, t: `${gameLink(D, o, r)} (${pn})` });
+        const added = cells.filter(x => x.c.st === 'Added'); const listed = cells.some(x => x.c.now);
+        if (added.length) items.push({ o: 0, score: Math.max(...added.map(x => x.c.now[0])), t: `${gameLink(D, o, r)} (${pn}) — newly ${ADDED} on ${added.map(x => D.site_label[x.s]).join(', ')}` });
+        else if (r.block2 && listed) items.push({ o: 1, score: 0, t: `${gameLink(D, o, r)} (${pn})` });
         for (const x of cells) if (x.c.st === 'Remains' && (bigMove(D, x.c) || x.c.dTasks != null)) {
-          const parts = [];
-          if (bigMove(D, x.c)) parts.push(`reward ${fmt(x.c.before[0])} → ${fmt(x.c.now[0])} (<span style="color:${x.c.dReward > 0 ? C(D).up : C(D).down}">${x.c.dReward > 0 ? '+' : '−'}${fmt(Math.abs(x.c.dReward))}</span>)`);
-          if (x.c.dTasks != null) parts.push(`milestones ${x.c.before[1]} → ${x.c.now[1]}`);
-          items.push({ o: 2, t: `${gameLink(D, o, r)} (${pn}) on ${D.site_label[x.s]} — ${parts.join(', ')}` });
+          const parts = []; let score = 0;
+          if (bigMove(D, x.c)) { parts.push(`reward ${fmt(x.c.before[0])} → ${fmt(x.c.now[0])} (<span style="color:${x.c.dReward > 0 ? C(D).up : C(D).down}">${x.c.dReward > 0 ? '+' : '−'}${fmt(Math.abs(x.c.dReward))}</span>)`); score = Math.abs(x.c.dReward); }
+          if (x.c.dTasks != null) { parts.push(`milestones ${x.c.before[1]} → ${x.c.now[1]}`); score = Math.max(score, Math.abs(x.c.dTasks) * 10); }
+          items.push({ o: 2, score, t: `${gameLink(D, o, r)} (${pn}) on ${D.site_label[x.s]} — ${parts.join(', ')}` });
         }
       }
-      items.sort((a, b) => a.o - b.o); out.push(...items.map(i => i.t));
-    }
-    return out;
+      items.forEach((it, k) => all.push({ ...it, pi, k }));
+    });
+    const max = o.maxFindings ?? MAX_FINDINGS;
+    const keep = new Set(all.slice().sort((a, b) => b.score - a.score || a.pi - b.pi || a.o - b.o).slice(0, max).map(i => i));
+    const shown = all.filter(i => keep.has(i)).sort((a, b) => a.pi - b.pi || a.o - b.o || b.score - a.score).map(i => i.t);
+    return { items: shown, total: all.length, hidden: all.length - shown.length };
+  }
+  const MAX_FINDINGS = 10;
+  // per-wall net movement among the titles we track (blocks 1 + 2)
+  function wallSummary(D, o) {
+    const rows = [...D.block1, ...D.block2];
+    return D.sites.map(s => { let listed = 0, added = 0, removed = 0; for (const r of rows) { const st = cellOf(D, o, s, r.keys).st; if (st === 'Added') { added++; listed++; } else if (st === 'Remains') listed++; else if (st === 'Removed') removed++; }
+      return { site: s, label: D.site_label[s], listed, added, removed }; });
   }
   function buildEmail(D, o) {
     const { date: chosen } = chosenDate(D, o.win); const F = 'font-family:Calibri,Arial,sans-serif;font-size:14px;color:#1f1f1f';
@@ -132,24 +144,27 @@
       for (const s of D.sites) { const st = cellOf(D, o, s, r.keys).st; if (st === 'Added') a.push(D.site_label[s]); if (st === 'Removed') rm.push(D.site_label[s]); }
       if (a.length || rm.length) changes.push(`${gameLink(D, o, r)} — ${[a.length ? `${ADDED} on ${a.join(', ')}` : '', rm.length ? `${REMOVED} from ${rm.join(', ')}` : ''].filter(Boolean).join('; ')}`);
     }
-    const nf = findings(D, o);
-    const tbl = t => t.replace(/<table>/g, '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;font-size:13px">').replace(/<th/g, '<th style="border:1px solid #cfcfcf;padding:5px 8px;background:#f0f3f6;text-align:left"').replace(/<td(?![^>]*style=)/g, '<td style="border:1px solid #cfcfcf;padding:5px 8px"').replace(/<td style="/g, '<td style="border:1px solid #cfcfcf;padding:5px 8px;');
+    const nf = findings(D, o); const cfg = o.cfg || {};
+    const greeting = cfg.greeting || 'Hello everyone,'; const signoff = cfg.signoff || 'Thanks,'; const signature = cfg.signature ? `<p>${esc(cfg.signature).replace(/\n/g, '<br>')}</p>` : '';
+    const ws = wallSummary(D, o);
+    const wallLine = `<p style="margin:4px 0 10px">${ws.map(w => `<b>${w.label}</b>: ${w.listed} tracked titles listed` + (w.added ? `, <span style="color:${C(D).up}">+${w.added} ${w.added === 1 ? 'entry' : 'entries'}</span>` : '') + (w.removed ? `, <span style="color:${C(D).down}">−${w.removed} ${w.removed === 1 ? 'exit' : 'exits'}</span>` : '') + (!w.added && !w.removed ? ', no entries or exits' : '')).join('<br>')}</p>`;
+    const tbl = t => t.replace(/<table>/g, '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;font-size:13px">').replace(/<th/g, '<th style="border:1px solid #cfcfcf;padding:5px 8px;background:#f0f3f6;text-align:left"').replace(/<td(?=[ >])(?![^>]*(?:style=|bgcolor=|valign=|width=))/g, '<td style="border:1px solid #cfcfcf;padding:5px 8px"').replace(/<td style="/g, '<td style="border:1px solid #cfcfcf;padding:5px 8px;');
     const legend = `<p style="${F};font-size:12px;margin:6px 0">${Object.entries(C(D)).filter(([k]) => !['up', 'down'].includes(k)).map(([k, [bg]]) => `<span style="color:${bg};font-size:16px;line-height:12px">&#9632;</span> ${k}&nbsp;&nbsp;&nbsp;`).join('')} ▲ / ▼ change vs last check</p>`;
     const ul = a => a.length ? `<ul style="margin:4px 0 10px 20px;padding:0">${a.map(x => `<li style="margin:2px 0">${x}</li>`).join('')}</ul>` : `<p style="margin:4px 0 10px 20px;color:#666">none</p>`;
     const base = o.baseUrl || '';
     // "bulletproof" button: a table cell with a background colour and a padded link renders in every Outlook
-    const button = (label, href) => `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;display:inline-table;margin:4px 8px 4px 0"><tr><td bgcolor="#1f4e79" style="border-radius:4px;padding:8px 16px"><a href="${href}" style="${F};color:#ffffff;text-decoration:none;font-weight:bold;display:inline-block">${label}</a></td></tr></table>`;
-    const buttons = base ? `<p style="margin:12px 0">${button('Open the dashboard', base + 'index.html?win=' + o.win)}${button('By publisher', base + 'index.html?tab=pub&win=' + o.win)}${button('Full catalog', base + 'index.html?tab=cat')}${button('Harvest status', base + 'status.html')}</p>` : '';
+    const button = (label, href) => `<td bgcolor="#1f4e79" valign="middle" style="border-radius:4px;padding:8px 16px"><a href="${href}" style="${F};color:#ffffff;text-decoration:none;font-weight:bold">${label}</a></td><td width="8"></td>`;
+    const buttons = base ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="border-collapse:separate;margin:12px 0"><tr>${button('Open the dashboard', base + 'index.html?win=' + o.win)}${button('By publisher', base + 'index.html?tab=pub&win=' + o.win)}${button('Full catalog', base + 'index.html?tab=cat')}${button('Harvest status', base + 'status.html')}</tr></table>` : '';
     const hint = base ? `<p style="font-size:12px;color:#666">Tip: every game name and every coloured cell below is a link — click a cell for that wall's milestone ladder, or a game for all walls side by side.</p>` : '';
-    const body = `<table role="presentation" border="0" cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse"><tr><td style="${F};padding:0">
-<p>Hello everyone,</p><p>Please find below the latest check regarding Playtika competitors in the offerwalls ${D.sites.map(s => D.site_label[s]).join(', ')}. This check covers what changed since ${chosen}.</p>
-${buttons}<p><b>Notable Findings:</b></p>${ul(nf)}<p>Our own titles currently listed: ${own.length ? esc(own.join('; ')) : 'none'}</p><p>Changes since ${chosen}:</p>${ul(changes)}
+    const body = `<table role="presentation" border="0" cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse"><tr><td valign="top" style="${F};padding:0">
+<p>${esc(greeting)}</p><p>Please find below the latest check regarding Playtika competitors in the offerwalls ${D.sites.map(s => D.site_label[s]).join(', ')}. This check covers what changed since ${chosen}.</p>
+${buttons}${wallLine}<p><b>Notable Findings${nf.hidden ? ` (top ${nf.items.length} of ${nf.total})` : ''}:</b></p>${ul(nf.items)}${nf.hidden ? `<p style="margin:-4px 0 10px 20px;font-size:12px;color:#666">${nf.hidden} more ${nf.hidden === 1 ? 'finding is' : 'findings are'} visible in the tables below${base ? ` and in the <a href="${base}index.html?win=${o.win}" style="color:#1f4e79">dashboard</a>` : ''}.</p>` : ''}<p>Our own titles currently listed: ${own.length ? esc(own.join('; ')) : 'none'}</p><p>Changes since ${chosen}:</p>${ul(changes)}
 <p><b>Direct Top Competitors Status:</b></p>${legend}${hint}<table>${focusTable(D, { ...o, q: '', fs: '', fw: '' }, true)}</table>
 <p style="margin-top:14px"><b>Where Each Competitor Stands:</b></p><table>${pubTable(D, o, true)}</table>
-${base ? `<p style="font-size:12px;color:#666">Live dashboard: <a href="${base}index.html" style="color:#1f4e79">${base}index.html</a> · this email was generated automatically from the ${D.check_date} check.</p>` : ''}<p>Thanks,</p></td></tr></table>`;
-    return { subject: `Competitors Status in Popular Offerwalls (${longDate(D.check_date)})`, html: tbl(body), since: chosen, check_date: D.check_date, findings: nf.length, changes: changes.length };
+${base ? `<p style="font-size:12px;color:#666">Live dashboard: <a href="${base}index.html" style="color:#1f4e79">${base}index.html</a> · this email was generated automatically from the ${D.check_date} check.</p>` : ''}<p>${esc(signoff)}</p>${signature}</td></tr></table>`;
+    return { subject: `Competitors Status in Popular Offerwalls (${longDate(D.check_date)})`, html: tbl(body), since: chosen, check_date: D.check_date, findings: nf.total, shown: nf.items.length, changes: changes.length };
   }
   function emailText(html) { return html.replace(/<\/(tr|p|li|div)>/g, '\n').replace(/<\/(td|th)>/g, '\t').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/\n{3,}/g, '\n\n').trim(); }
 
-  return { esc, fmt, longDate, pubName, statusOf, chosenDate, baselineDate, pres, cellOf, cellHtml, legendHtml, rowMatches, focusTable, pubStats, pubTable, findings, buildEmail, emailText };
+  return { esc, fmt, longDate, pubName, statusOf, chosenDate, baselineDate, pres, cellOf, cellHtml, legendHtml, rowMatches, focusTable, pubStats, pubTable, findings, wallSummary, buildEmail, emailText, MAX_FINDINGS };
 });
