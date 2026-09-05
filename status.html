@@ -27,8 +27,8 @@ ul.warn{margin:6px 0 0 18px;padding:0;color:var(--ink2);font-size:13px}
 <main>
   <div class="hero"><div class="light grey" id="light"></div><div><h2 id="headline">Loading…</h2><div class="why" id="why"></div></div><div class="next"><span>Next scheduled run</span><b id="next">—</b><span id="nextIn"></span></div></div>
   <div class="cards" id="cards"></div>
-  <h3>Recent harvests <span class="muted small">— one row per scheduled run (captures within 90 minutes are grouped); times are local</span></h3>
-  <div class="tbl"><table id="runs"><thead><tr><th>Started</th><th>Result</th><th>Freecash</th><th>Kashkick</th><th>TesterUp</th><th>Published</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+  <h3>Recent harvests <span class="muted small">— one row per scheduled run (captures within 90 minutes are grouped); times are Israel time (Asia/Jerusalem)</span></h3>
+  <div class="tbl"><table id="runs"><thead><tr><th>Started (Israel time)</th><th>Result</th><th>Freecash</th><th>Kashkick</th><th>TesterUp</th><th>Published</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
   <h3>Build warnings from the last publish <span class="muted small" id="warnTs"></span></h3>
   <ul class="warn" id="warnings"></ul>
 </main>
@@ -37,7 +37,7 @@ ul.warn{margin:6px 0 0 18px;padding:0;color:var(--ink2);font-size:13px}
 const AUTO_SINCE=new Date('2026-09-04T17:00:00Z'); // earlier rows are manual imports, not graded
 const SITES=['freecash','kashkick','testerup'], LABEL={freecash:'Freecash',kashkick:'Kashkick',testerup:'TesterUp'};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fmtT=d=>d.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const fmtT=d=>d.toLocaleString('en-GB',{timeZone:'Asia/Jerusalem',weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 const tsDate=ts=>{const m=ts.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/);return new Date(Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5]));};
 const ago=ms=>{const m=Math.round(ms/6e4); if(m<60) return `${m} min`; const h=Math.floor(m/60); return h<48?`${h} h ${m%60} min`:`${Math.floor(h/24)} days`;};
 async function jsonl(u){const r=await fetch(u+'?_='+Date.now()); if(!r.ok) throw new Error(u+' '+r.status); return (await r.text()).split('\n').filter(Boolean).map(l=>JSON.parse(l));}
@@ -73,7 +73,7 @@ function grade(h, sched){ // per harvest: green all three PASS & not suspect; or
     // harvest table
     const cell=r=>r?`<td class="num"><span class="${r.integrity==='PASS'&&!r.suspect?'ok':'warn'}">●</span> ${r.games} <span class="muted small">/ ${r.milestones.toLocaleString()}</span></td>`:`<td class="num muted">—</td>`;
     document.querySelector('#runs tbody').innerHTML=harvests.slice(0,40).map(h=>{ const g=h.start<AUTO_SINCE?{by:Object.fromEntries(h.items.map(r=>[r.platform,r])),level:'grey',notes:['manual import (before automation)']}:grade(h,sched); const pub=published&&published>=h.end&&(!harvests.find(x=>x.start>h.end&&published>=x.end));
-      return `<tr><td>${fmtT(h.start)}${h.items.length>1&&h.end-h.start>60e3?` <span class="muted small">→ ${h.end.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})}</span>`:''}</td><td><span class="dot ${g.level}"></span>${g.level==='green'?'OK':g.level==='grey'?'Manual':'Problem'}</td>${SITES.map(s=>cell(g.by[s])).join('')}<td class="small">${pub?'<span class="ok">✓</span> '+fmtT(published):'<span class="muted">—</span>'}</td><td class="small">${esc(g.notes.join(' · '))||'<span class="muted">—</span>'}</td></tr>`; }).join('');
+      return `<tr><td>${fmtT(h.start)}${h.items.length>1&&h.end-h.start>60e3?` <span class="muted small">→ ${h.end.toLocaleTimeString('en-GB',{timeZone:'Asia/Jerusalem',hour:'2-digit',minute:'2-digit'})}</span>`:''}</td><td><span class="dot ${g.level}"></span>${g.level==='green'?'OK':g.level==='grey'?'Manual':'Problem'}</td>${SITES.map(s=>cell(g.by[s])).join('')}<td class="small">${pub?'<span class="ok">✓</span> '+fmtT(published):'<span class="muted">—</span>'}</td><td class="small">${esc(g.notes.join(' · '))||'<span class="muted">—</span>'}</td></tr>`; }).join('');
     // warnings
     const w=(status&&status.warnings)||[]; document.getElementById('warnTs').textContent=published?`(${fmtT(published)})`:''; document.getElementById('warnings').innerHTML=w.length?w.map(x=>`<li>${esc(x)}</li>`).join(''):'<li class="muted">none</li>';
   }catch(e){ document.getElementById('light').className='light red'; document.getElementById('headline').textContent='Cannot read status data'; document.getElementById('why').textContent=e.message; }
