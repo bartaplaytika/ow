@@ -1,5 +1,5 @@
 {
- "published_at": "2026-09-06T12:54:17+00:00",
+ "published_at": "2026-09-06T18:53:07+00:00",
  "schedule": {
   "cron_utc": "43 */6 * * *",
   "hours_utc": [
@@ -15,7 +15,7 @@
   "Freecash 2026-08-23: offer count 102 -> 228 (+124%) — almost certainly a coverage change, not a market move",
   "Freecash 2026-08-25: offer count 228 -> 335 (+47%) — almost certainly a coverage change, not a market move",
   "Freecash 2026-09-04: offer count 246 -> 397 (+61%) — almost certainly a coverage change, not a market move",
-  "Freecash 2026-09-06: offer count 395 -> 170 (-57%) — almost certainly a coverage change, not a market move",
+  "Freecash 2026-09-06: offer count 395 -> 218 (-45%) — almost certainly a coverage change, not a market move",
   "TesterUp 2026-08-25: offer count 19 -> 77 (+305%) — almost certainly a coverage change, not a market move",
   "TesterUp 2026-09-05: offer count 57 -> 108 (+89%) — almost certainly a coverage change, not a market move",
   "publisher spelling overlap: 'Playtika' vs 'SuperPlay (Playtika)' — one company under two names splits its row",
